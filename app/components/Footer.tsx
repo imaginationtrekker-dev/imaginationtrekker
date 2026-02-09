@@ -54,8 +54,8 @@ export default function Footer() {
           <div className="footer-column">
             <h3 className="footer-column-title">Address</h3>
             <div className="footer-column-content">
-              <p>123 Main Street</p>
-              <p>New York, NY 10001</p>
+              <p>Badonwala Baisak, Arkedia Grant Premnagar Dehradun</p>
+              <p>Dehradun Uttarakhand, India, 248007</p>
             </div>
           </div>
 
