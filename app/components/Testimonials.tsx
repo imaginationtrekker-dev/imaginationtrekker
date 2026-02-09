@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
 interface Testimonial {
+  id?: string;
   name: string;
   quote: string;
   review: string;
@@ -11,53 +12,55 @@ interface Testimonial {
   rating: number;
 }
 
-const testimonials: Testimonial[] = [
-  {
-    name: "Sarah Kathrik",
-    quote: "A Journey Tailored Just for Me",
-    review: "My Bali adventure with Imagination Trekker everything hoped for and more. From the moment landed, I felt cared they had arranged a wonderful local guide.",
-    location: "Santorini, Greece",
-    rating: 4.6,
-  },
-  {
-    name: "Michale Jason",
-    quote: "Exceeded Every Expectation!",
-    review: "This wasn't just a vacation it was an of a lifetime. Imagination Trekker's attention to detail and passion for travel shined through in every part of the trip. Highly recommended!",
-    location: "Reykjavik, Iceland",
-    rating: 4.6,
-  },
-  {
-    name: "Emma Mathe",
-    quote: "Stress-Free Adventures",
-    review: "The whole trip was stress-free, thanks to Imagination Trekker. They handled everything, airport transfers to last-minute changes. All I had to do was relax and enjoy the journey!",
-    location: "Venice, Italy",
-    rating: 4.6,
-  },
-  {
-    name: "David Wilson",
-    quote: "Unforgettable Experience",
-    review: "The trekking experience was beyond amazing. The guides were professional, the routes were breathtaking, and every moment was perfectly organized.",
-    location: "Nepal, Himalayas",
-    rating: 5.0,
-  },
-  {
-    name: "Lisa Anderson",
-    quote: "Best Adventure Yet",
-    review: "I've been on many adventures, but this one stands out. The team's expertise and attention to safety made all the difference. Can't wait for the next trip!",
-    location: "Switzerland, Alps",
-    rating: 4.8,
-  },
-];
-
 export default function Testimonials() {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
   const cardsToShow = 3;
   const maxIndex = Math.max(0, testimonials.length - cardsToShow);
 
+  // Fetch testimonials from API
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/testimonials');
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch testimonials");
+        }
+
+        const result = await response.json();
+        if (result.testimonials && result.testimonials.length > 0) {
+          // Map database fields to component interface
+          const mappedTestimonials = result.testimonials.map((t: any) => ({
+            id: t.id,
+            name: t.name || 'Anonymous',
+            quote: t.title || t.quote || '',
+            review: t.description || t.review || t.testimonial_text || t.message || '',
+            location: t.location || '',
+            rating: t.rating || 5.0,
+          }));
+          setTestimonials(mappedTestimonials);
+        } else {
+          // Fallback to empty array if no testimonials
+          setTestimonials([]);
+        }
+      } catch (err) {
+        console.error("Error loading testimonials:", err);
+        setTestimonials([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTestimonials();
+  }, []);
+
   // GSAP slider animation
   useEffect(() => {
-    if (!trackRef.current || !trackRef.current.children[0]) return;
+    if (!trackRef.current || !trackRef.current.children[0] || testimonials.length === 0) return;
 
     const firstCard = trackRef.current.children[0] as HTMLElement;
     const cardWidth = firstCard.getBoundingClientRect().width;
@@ -69,7 +72,7 @@ export default function Testimonials() {
       duration: 0.6,
       ease: "power2.out",
     });
-  }, [currentIndex]);
+  }, [currentIndex, testimonials.length]);
 
   const goToNext = () => {
     setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
@@ -82,6 +85,38 @@ export default function Testimonials() {
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
   };
+
+  if (loading) {
+    return (
+      <section className="testimonials-section">
+        <div className="testimonials-container">
+          <div className="testimonials-header">
+            <span className="testimonials-tag">Testimonial</span>
+            <h2 className="testimonials-title">Real Stories from Happy Travelers</h2>
+          </div>
+          <div style={{ textAlign: 'center', padding: '4rem 0' }}>
+            <p>Loading testimonials...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (testimonials.length === 0) {
+    return (
+      <section className="testimonials-section">
+        <div className="testimonials-container">
+          <div className="testimonials-header">
+            <span className="testimonials-tag">Testimonial</span>
+            <h2 className="testimonials-title">Real Stories from Happy Travelers</h2>
+          </div>
+          <div style={{ textAlign: 'center', padding: '4rem 0' }}>
+            <p>No testimonials available at the moment.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="testimonials-section">

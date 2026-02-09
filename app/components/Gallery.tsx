@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase-browser";
 import { gsap } from "gsap";
 
 interface GalleryImage {
@@ -25,7 +24,6 @@ export default function Gallery() {
   const lightboxImageRef = useRef<HTMLDivElement>(null);
   const marqueeLeftRef = useRef<HTMLDivElement>(null);
   const marqueeRightRef = useRef<HTMLDivElement>(null);
-  const supabase = createClient();
   const maxDisplayImages = 20;
 
   useEffect(() => {
@@ -35,16 +33,17 @@ export default function Gallery() {
   const loadImages = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("gallery")
-        .select("*")
-        .order("display_order", { ascending: true })
-        .order("created_at", { ascending: false });
+      const response = await fetch('/api/gallery');
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch gallery images");
+      }
 
-      if (error) throw error;
-      setAllImages(data || []);
+      const result = await response.json();
+      const data = result.images || [];
+      setAllImages(data);
       // Show only first 20 images
-      setImages((data || []).slice(0, maxDisplayImages));
+      setImages(data.slice(0, maxDisplayImages));
     } catch (err: any) {
       console.error("Error loading gallery images:", err);
       setAllImages([]);

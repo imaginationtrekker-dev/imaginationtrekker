@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { gsap } from "gsap";
-import { createClient } from "@/lib/supabase-browser";
 import { stripHtmlTags } from "@/lib/utils";
 
 interface Package {
@@ -46,25 +45,21 @@ export default function PackagesSlider() {
     return () => window.removeEventListener("resize", updateCardsToShow);
   }, []);
 
-  // Fetch packages from database
+  // Fetch packages from API
   useEffect(() => {
     const fetchPackages = async () => {
       try {
         setLoading(true);
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from("packages")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(12); // Limit to 12 packages for homepage
-
-        if (error) {
-          console.error("Error fetching packages:", error);
-          return;
+        const response = await fetch('/api/packages?pageNumber=1');
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch packages");
         }
 
-        if (data) {
-          setPackages(data as Package[]);
+        const result = await response.json();
+        if (result.packages) {
+          // Limit to 12 packages for homepage
+          setPackages((result.packages as Package[]).slice(0, 12));
         }
       } catch (err) {
         console.error("Error loading packages:", err);

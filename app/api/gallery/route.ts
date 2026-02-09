@@ -7,11 +7,20 @@ export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
   try {
+    // Verify environment variables are available
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Missing Supabase environment variables');
+      return NextResponse.json(
+        { error: 'Server configuration error', details: 'Missing Supabase credentials' },
+        { status: 500 }
+      );
+    }
+
     // Create a public Supabase client for anonymous access (no auth required)
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     const { data, error } = await supabase
       .from('gallery')
@@ -21,8 +30,15 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching gallery images:', error);
+      console.error('Error code:', error.code);
+      console.error('Error details:', error.details);
       return NextResponse.json(
-        { error: 'Failed to fetch gallery images', details: error.message },
+        { 
+          error: 'Failed to fetch gallery images', 
+          details: error.message,
+          code: error.code,
+          hint: error.hint || 'Check Supabase RLS policies for anonymous access'
+        },
         { status: 500 }
       );
     }
