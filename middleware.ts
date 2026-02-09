@@ -4,20 +4,21 @@ import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
 export async function middleware(req: NextRequest) {
+  // Early return for non-dashboard routes (shouldn't happen with our matcher, but defensive)
+  if (!req.nextUrl.pathname.startsWith('/dashboard')) {
+    return NextResponse.next();
+  }
+
   // Check if environment variables are set
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // If environment variables are missing, allow the request to continue
+  // If environment variables are missing, redirect to login
   // This prevents crashes during deployment before env vars are set
   if (!supabaseUrl || !supabaseAnonKey) {
-    // Only protect dashboard routes if we have the necessary env vars
-    if (req.nextUrl.pathname.startsWith('/dashboard')) {
-      const loginUrl = new URL('/login', req.nextUrl.origin);
-      loginUrl.searchParams.set('redirectedFrom', req.nextUrl.pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-    return NextResponse.next();
+    const loginUrl = new URL('/login', req.nextUrl.origin);
+    loginUrl.searchParams.set('redirectedFrom', req.nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   let res = NextResponse.next({
@@ -49,8 +50,8 @@ export async function middleware(req: NextRequest) {
       data: { session },
     } = await supabase.auth.getSession();
 
-    // Protect all /dashboard routes
-    if (!session && req.nextUrl.pathname.startsWith('/dashboard')) {
+    // Protect all /dashboard routes - redirect to login if no session
+    if (!session) {
       const loginUrl = new URL('/login', req.nextUrl.origin);
       loginUrl.searchParams.set('redirectedFrom', req.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
@@ -68,9 +69,11 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match dashboard routes only.
-     * This matcher excludes API routes, Next.js internals, and static files automatically.
+     * Match only dashboard routes.
+     * Explicitly match both /dashboard and /dashboard/* paths.
+     * Next.js automatically excludes API routes, _next, and static files.
      */
+    '/dashboard',
     '/dashboard/:path*',
   ],
 };
