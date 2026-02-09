@@ -74,11 +74,11 @@ export default function Footer() {
           <div className="footer-column">
             <h3 className="footer-column-title">Contact</h3>
             <div className="footer-column-content">
-              <a href="mailto:travlo@gmail.com" className="footer-link">
-                travlo@gmail.com
+              <a href="mailto:info@imaginationtrekker.com" className="footer-link">
+                info@imaginationtrekker.com
               </a>
-              <a href="tel:+1500321852789" className="footer-link">
-                +1 500 321 852 789
+              <a href="tel:+91 70607 54265" className="footer-link">
+               +917060754265
               </a>
             </div>
           </div>
@@ -99,7 +99,7 @@ export default function Footer() {
 
         {/* Copyright Section */}
         <div className="footer-copyright">
-          <p>Copyright © Travlo I Designed by Brandbes - Powered by Webflow</p>
+          <p>Copyright © Imagination Trekker</p>
         </div>
       </div>
     </footer>
