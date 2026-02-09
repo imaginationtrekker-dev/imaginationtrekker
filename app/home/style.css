@@ -3389,11 +3389,11 @@
   }
 
   .testimonials-nav-prev {
-    left: 10px;
+    left: -20px;
   }
 
   .testimonials-nav-next {
-    right: 10px;
+    right: -20px;
   }
 
   .testimonials-nav-btn {
@@ -3405,6 +3405,12 @@
   .testimonials-nav-btn svg {
     width: 18px;
     height: 18px;
+  }
+  .footer-logo img{
+    width: 80px;
+  }
+  .contact-modal-left{
+    display: none;
   }
 }
 
