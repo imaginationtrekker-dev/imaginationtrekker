@@ -13,7 +13,7 @@ export async function middleware(req: NextRequest) {
   if (!supabaseUrl || !supabaseAnonKey) {
     // Only protect dashboard routes if we have the necessary env vars
     if (req.nextUrl.pathname.startsWith('/dashboard')) {
-      const loginUrl = new URL('/login', req.url);
+      const loginUrl = new URL('/login', req.nextUrl.origin);
       loginUrl.searchParams.set('redirectedFrom', req.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
     }
@@ -51,7 +51,7 @@ export async function middleware(req: NextRequest) {
 
     // Protect all /dashboard routes
     if (!session && req.nextUrl.pathname.startsWith('/dashboard')) {
-      const loginUrl = new URL('/login', req.url);
+      const loginUrl = new URL('/login', req.nextUrl.origin);
       loginUrl.searchParams.set('redirectedFrom', req.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
     }
@@ -66,5 +66,11 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: [
+    /*
+     * Match dashboard routes only.
+     * This matcher excludes API routes, Next.js internals, and static files automatically.
+     */
+    '/dashboard/:path*',
+  ],
 };
