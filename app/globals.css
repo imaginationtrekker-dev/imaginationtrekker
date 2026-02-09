@@ -1,26 +1,71 @@
 @import "tailwindcss";
+@import "react-day-picker/dist/style.css";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-fraunces: "Fraunces", serif;
+  --font-jakarta: "Plus Jakarta Sans", sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-fraunces);
+  --font-body: var(--font-jakarta);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
     --foreground: #ededed;
   }
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-jakarta);
+}
+
+/* Apply Fraunces to all headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-fraunces), "Fraunces", serif;
+}
+
+/* Apply Jakarta Sans to body text, paragraphs, lists, spans, and buttons */
+* {
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+body,
+p,
+li,
+span,
+button,
+a,
+div,
+input,
+textarea,
+select,
+label {
+  font-family: "Plus Jakarta Sans", sans-serif !important;
+}
+
+/* Keep headings as Fraunces */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-fraunces), "Fraunces", serif !important;
+}
+
+/* Utility class for Fraunces font */
+.font-fraunces {
+  font-family: var(--font-fraunces), "Fraunces", serif;
 }
