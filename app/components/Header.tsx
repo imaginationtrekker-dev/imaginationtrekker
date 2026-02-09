@@ -93,7 +93,7 @@ export default function Header() {
           <Link href="/" className="header-logo" onClick={closeMobileMenu}>
             <Image
               src="/images/logo.png"
-              alt="Travlo Logo"
+              alt="Imagination Trekker Logo"
               width={200}
               height={80}
               priority
