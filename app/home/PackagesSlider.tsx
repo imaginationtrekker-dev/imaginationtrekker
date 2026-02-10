@@ -97,9 +97,17 @@ export default function PackagesSlider() {
     let dragStartX = 0;
     let dragStartIndex = 0;
     let isDraggingState = false;
+    let hasMovedSignificantly = false;
 
     const handleStart = (e: MouseEvent | TouchEvent) => {
+      // Don't start drag if clicking on a link or button
+      const target = e.target as HTMLElement;
+      if (target.closest('a') || target.closest('button')) {
+        return;
+      }
+      
       isDraggingState = true;
+      hasMovedSignificantly = false;
       setIsDragging(true);
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       dragStartX = clientX;
@@ -108,28 +116,51 @@ export default function PackagesSlider() {
 
     const handleMove = (e: MouseEvent | TouchEvent) => {
       if (!isDraggingState) return;
-      e.preventDefault();
       
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       const diff = dragStartX - clientX;
-      const threshold = 50; // Minimum drag distance to trigger slide change
+      const moveThreshold = 10; // Threshold to consider it a drag (not a click)
+      const slideThreshold = 50; // Minimum drag distance to trigger slide change
 
-      if (Math.abs(diff) > threshold) {
+      // Only prevent default if we've moved significantly (to allow clicks to work)
+      if (Math.abs(diff) > moveThreshold) {
+        hasMovedSignificantly = true;
+        e.preventDefault();
+      }
+
+      if (Math.abs(diff) > slideThreshold) {
         if (diff > 0 && dragStartIndex < maxIndex) {
           setCurrentIndex(dragStartIndex + 1);
           isDraggingState = false;
           setIsDragging(false);
+          hasMovedSignificantly = false;
         } else if (diff < 0 && dragStartIndex > 0) {
           setCurrentIndex(dragStartIndex - 1);
           isDraggingState = false;
           setIsDragging(false);
+          hasMovedSignificantly = false;
         }
       }
     };
 
-    const handleEnd = () => {
+    const handleEnd = (e: MouseEvent | TouchEvent) => {
+      // If we didn't move significantly, it was a click - allow it to proceed
+      if (isDraggingState && !hasMovedSignificantly) {
+        // Don't prevent default - let the click event fire
+        isDraggingState = false;
+        setIsDragging(false);
+        return;
+      }
+      
+      // If we dragged, prevent any click events
+      if (hasMovedSignificantly) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
       isDraggingState = false;
       setIsDragging(false);
+      hasMovedSignificantly = false;
     };
 
     // Mouse events
