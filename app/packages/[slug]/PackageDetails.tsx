@@ -5,11 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import ContactModal from "@/app/components/ContactModal";
 import { gsap } from "gsap";
-import { FileText, MapPin, CheckCircle, XCircle, Navigation, HelpCircle, Calendar, ChevronDown } from "lucide-react";
+import { FileText, MapPin, CheckCircle, XCircle, Navigation, HelpCircle, Calendar, ChevronDown, Shield } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { stripHtmlTags } from "@/lib/utils";
 import "./package-details.css";
-import "../../home/style.css";
 
 interface PackageData {
   id: string;
@@ -27,6 +26,7 @@ interface PackageData {
   how_to_reach: string | null;
   cancellation_policy: string | null;
   refund_policy: string | null;
+  safety_for_trek: string | null;
   faqs: any[] | null;
   booking_dates: string[] | null;
   why_choose_us: any[] | null;
@@ -129,7 +129,7 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
   };
 
   const handleWhatsAppClick = () => {
-    const whatsappNumber = "919876543210";
+    const whatsappNumber = "917817849247";
     const message = encodeURIComponent(
       `Hello! I'm interested in the ${packageData.package_name} package.`
     );
@@ -137,7 +137,7 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
   };
 
   const handleCallClick = () => {
-    window.location.href = "tel:+919876543210";
+    window.location.href = "tel:+917817849247";
   };
 
   // Get available sections with icons
@@ -147,6 +147,7 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
     { id: "inclusions", label: "Inclusions", icon: CheckCircle, condition: !!packageData.inclusions },
     { id: "exclusions", label: "Exclusions", icon: XCircle, condition: !!packageData.exclusions },
     { id: "how-to-reach", label: "How to Reach", icon: Navigation, condition: !!packageData.how_to_reach },
+    { id: "safety-for-trek", label: "Safety", icon: Shield, condition: !!packageData.safety_for_trek },
     { id: "faqs", label: "FAQs", icon: HelpCircle, condition: !!packageData.faqs && Array.isArray(packageData.faqs) && packageData.faqs.length > 0 },
   ].filter(section => section.condition);
 
@@ -536,6 +537,27 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
                 </div>
               )}
 
+              {/* Safety for the Trek */}
+              {packageData.safety_for_trek && (
+                <div id="safety-for-trek" className="package-section">
+                  <h2 className="package-section-title">Safety for the Trek</h2>
+                  <div className="package-exclusions">
+                    {parseContentToList(packageData.safety_for_trek).map((item, index) => (
+                      <div key={index} className="package-list-item">
+                        <div className="package-list-icon">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                          </svg>
+                        </div>
+                        <div className="package-list-text" dangerouslySetInnerHTML={{ __html: item }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* FAQs */}
               {packageData.faqs &&
                 Array.isArray(packageData.faqs) &&
@@ -611,6 +633,75 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
 
             {/* Right Sticky Form - Premium Design */}
             <div className="package-content-right">
+              {/* Mobile Only: Breadcrumbs, Title, and Meta */}
+              <div className="package-mobile-header">
+                <nav className="package-breadcrumbs">
+                  <Link href="/" className="package-breadcrumb-link">
+                    Home
+                  </Link>
+                  <span className="package-breadcrumb-separator">/</span>
+                  <Link href="/packages" className="package-breadcrumb-link">
+                    Packages
+                  </Link>
+                  <span className="package-breadcrumb-separator">/</span>
+                  <span className="package-breadcrumb-current">
+                    {packageData.package_name}
+                  </span>
+                </nav>
+                <h1 className="package-title">{packageData.package_name}</h1>
+                <div className="package-meta">
+                  {packageData.package_duration && (
+                    <div className="package-meta-item">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                      <span>{packageData.package_duration}</span>
+                    </div>
+                  )}
+                  {packageData.difficulty && (
+                    <div className="package-meta-item">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                        <path d="M2 17l10 5 10-5" />
+                        <path d="M2 12l10 5 10-5" />
+                      </svg>
+                      <span>{packageData.difficulty}</span>
+                    </div>
+                  )}
+                  {packageData.altitude && (
+                    <div className="package-meta-item">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                      </svg>
+                      <span>{packageData.altitude}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="package-contact-form-wrapper">
                 {/* Premium Price Section */}
                 <div className="package-premium-header">
@@ -716,7 +807,7 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
                 {/* Contact Information */}
                 <div className="package-contact-section">
                   <h4 className="package-contact-title">Need Help? Talk to our Mountain Expert</h4>
-                  <a href="tel:+917060754265" className="package-call-now-btn">
+                  <a href="tel:+917817849247" className="package-call-now-btn">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                     </svg>
@@ -829,6 +920,7 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
 
       {/* Recent Packages Slider */}
       <RecentPackagesSlider currentPackageId={packageData.id} />
+
     </>
   );
 }
@@ -925,6 +1017,10 @@ function RecentPackagesSlider({ currentPackageId }: { currentPackageId: string }
 
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
   };
 
   if (loading || packages.length === 0) {
@@ -1034,6 +1130,20 @@ function RecentPackagesSlider({ currentPackageId }: { currentPackageId: string }
               </Link>
             ))}
           </div>
+
+          {/* Navigation Dots */}
+          {packages.length > cardsToShow && (
+            <div className="recent-packages-dots">
+              {Array.from({ length: maxIndex + 1 }).map((_, index) => (
+                <button
+                  key={index}
+                  className={`recent-packages-dot ${index === currentIndex ? "active" : ""}`}
+                  onClick={() => goToSlide(index)}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

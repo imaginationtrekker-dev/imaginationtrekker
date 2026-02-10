@@ -474,12 +474,22 @@
 }
 
 @media (min-width: 1024px) {
+  .banner-content{
+    padding-block: 80px;
+  }
+  .marquee-text{
+    font-size: 40px  !important;
+  }
   .banner-title {
-    font-size: 3.75rem;
+    font-size: 52px;
+  }
+  .banner-description{
+    font-size: 16px;
+    max-width: 600px;
   }
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1440px) {
   .banner-title {
     font-size: 4.5rem;
   }
@@ -500,11 +510,6 @@
   }
 }
 
-@media (min-width: 1024px) {
-  .banner-description {
-    font-size: 1.25rem;
-  }
-}
 
 .cta-buttons {
   display: flex;
@@ -1243,6 +1248,9 @@
   text-decoration: none;
   color: inherit;
   display: block;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .package-card {
@@ -1258,7 +1266,6 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid #0d5a6f;
   position: relative;
-  height: 100%;
   width: 100%;
   box-sizing: border-box;
 }
@@ -1268,6 +1275,8 @@
   flex: none;
   min-width: 0;
   max-width: 100%;
+  height: auto;
+  min-height: auto;
 }
 
 .package-card:hover {
@@ -1276,11 +1285,22 @@
   border-color: #e5e7eb;
 }
 
+.package-card-image-link {
+  display: block;
+  width: 100%;
+  height: 250px;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 .package-card-image {
   position: relative;
   width: 100%;
   height: 250px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .package-image {
@@ -1301,8 +1321,9 @@
   gap: 1rem;
   flex: 1;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
+  min-height: 0;
 }
 
 .package-card-title {
@@ -1331,6 +1352,7 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .package-details-bar {
@@ -1541,124 +1563,131 @@
 }
 
 /* ============================================
-   PACKAGES PAGE
+   FOOTER SECTION
    ============================================ */
 
-.packages-page-banner {
+.footer-section {
   position: relative;
   width: 100%;
-  height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
+  overflow: hidden;
+  padding-top: 4rem;
+  padding-bottom: 3rem;
+  background: #000000;
 }
 
-.packages-banner-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1;
-}
-
-.packages-banner-image {
-  object-fit: cover;
-}
-
-.packages-banner-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%);
-  z-index: 2;
-}
-
-.packages-banner-content {
+/* Footer Content */
+.footer-content {
   position: relative;
-  z-index: 3;
-  text-align: center;
-  color: white;
+  z-index: 5;
   max-width: 1280px;
-  width: 100%;
+  margin: 0 auto;
   padding: 0 1.5rem;
 }
 
-.packages-banner-title {
-  font-size: 48px;
-  font-weight: 700;
-  color: #ffffff;
-  line-height: 1.2;
-  font-family: var(--font-fraunces), "Fraunces", serif;
-  margin: 0 0 1.5rem 0;
-  text-transform: uppercase;
-}
-
-.breadcrumbs {
+/* Header Section - Logo and Social Media */
+.footer-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  font-family: var(--font-jakarta);
-  font-size: 16px;
+  flex-wrap: wrap;
+  gap: 2rem;
 }
 
-.breadcrumb-link {
+.footer-logo {
+  flex-shrink: 0;
+}
+.footer-logo img{
+  width: 120px;
+}
+.footer-social {
+  display: flex;
+  gap: 1rem;
+}
+
+.footer-social-link {
   color: #ffffff;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
-.breadcrumb-link:hover {
+.footer-social-link:hover {
   color: #0d5a6f;
 }
 
-.breadcrumb-separator {
-  color: #9ca3af;
+.social-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
 }
 
-.breadcrumb-current {
-  color: #9ca3af;
+.social-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
 }
 
-.packages-page-section {
-  width: 100%;
-  background: #ffffff;
-  padding: 2rem 0;
-  position: relative;
-  overflow: visible;
-}
-
-.packages-page-container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  position: relative;
-  overflow: visible;
-}
-
-.packages-page-layout {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
+/* Footer Links Section */
+.footer-links {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 2rem;
-  align-items: start;
+  margin-top: 3rem;
+  padding-top: 3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Mobile Filters Button - Hidden on Desktop */
-.mobile-filters-button {
-  display: none;
+.footer-column {
+  margin-bottom: 1.5rem;
 }
 
-/* Mobile filters hidden on desktop by default */
-.mobile-filters-overlay {
-  display: none;
+.footer-column-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 1rem 0;
+  font-family: var(--font-fraunces), "Fraunces", serif;
+  text-transform: uppercase;
 }
+
+.footer-column-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footer-link {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  font-family: var(--font-jakarta);
+  transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+  color: #ffffff;
+}
+
+/* Footer Bottom */
+.footer-bottom {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.footer-bottom-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+  font-family: var(--font-jakarta);
+}
+
+/* ============================================
+   FOOTER SECTION
+   ============================================ */
 
 .mobile-filters-panel {
   display: none;
@@ -2332,7 +2361,7 @@
 
 @media (max-width: 768px) {
   .packages-page-banner {
-    height: 300px;
+    height: 200px;
   }
 
   .packages-banner-title {
@@ -2373,7 +2402,7 @@
     justify-content: center;
     gap: 0.5rem;
     position: fixed;
-    bottom: 7rem;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.85);
@@ -3438,7 +3467,7 @@
 .floating-buttons {
   position: fixed;
   bottom: 2rem;
-  right: 2rem;
+  left: 2rem;
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -3446,10 +3475,7 @@
   align-items: flex-end;
 }
 
-/* Hide mobile buttons on desktop */
-.floating-buttons-mobile {
-  display: none;
-}
+/* WhatsApp button works on both mobile and desktop */
 
 .floating-whatsapp-btn {
   width: 60px;
@@ -3477,7 +3503,7 @@
 }
 
 .floating-contact-btn {
-  display: flex;
+  display: none; /* Hidden on desktop for now */
   align-items: center;
   gap: 0.75rem;
   padding: 0.875rem 1.5rem;
@@ -3843,108 +3869,19 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  /* Hide desktop buttons on mobile */
-  .floating-buttons-desktop {
-    display: none !important;
+  .floating-buttons {
+    bottom: 20px;
+    left: 1.5rem;
   }
 
-  /* Show mobile buttons */
-  .floating-buttons-mobile {
-    display: flex !important;
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10000;
-    width: 100%;
-    max-width: 100%;
+  .floating-whatsapp-btn {
+    width: 44px;
+    height: 44px;
   }
 
-  /* Inner container with white background */
-  .mobile-buttons-container {
-    display: flex;
-    flex-direction: row;
-    gap: 0.75rem;
-    align-items: center;
-    width: 100%;
-    padding: 0.75rem;
-    background: #ffffff;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  }
-
-  /* Mobile WhatsApp Button - White with green icon and text */
-  .mobile-whatsapp-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.875rem 1rem;
-    background: #ffffff;
-    color: #25D366;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    font-family: var(--font-jakarta);
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-  }
-
-  .mobile-whatsapp-btn:hover {
-    background: #f9fafb;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-1px);
-  }
-
-  .mobile-whatsapp-btn svg {
-    flex-shrink: 0;
-    width: 20px;
-    height: 20px;
-  }
-
-  .mobile-whatsapp-btn span {
-    color: #25D366;
-    font-weight: 600;
-  }
-
-  /* Mobile Contact Button - Gradient orange to yellow */
-  .mobile-contact-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.875rem 1rem;
-    background: linear-gradient(135deg, #0d5a6f 0%, #0d5a6f 100%);
-    color: #ffffff;
-    border: none;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    font-family: var(--font-jakarta);
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
-  }
-
-  .mobile-contact-btn:hover {
-      background: linear-gradient(135deg, #0d5a6f 0%, #0d5a6f 100%);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    transform: translateY(-1px);
-  }
-
-  .mobile-contact-btn svg {
-    flex-shrink: 0;
-    width: 20px;
-    height: 20px;
-    stroke: #ffffff;
-  }
-
-  .mobile-contact-btn span {
-    color: #ffffff;
-    font-weight: 600;
+  .floating-whatsapp-btn svg {
+    width: 26px;
+    height: 26px;
   }
 
   .contact-modal {
@@ -3957,15 +3894,31 @@
   }
 
   .contact-modal-right {
-    padding: 2rem;
+    padding: 24px 12px;
   }
 
   .contact-modal-heading {
-    font-size: 1.5rem;
+    font-size: 28px;
   }
 
   .contact-form-title {
-    font-size: 1.5rem;
+    font-size:20px;
+  }
+  .contact-modal-close{
+    top: 12px;
+    right: 12px;
+  }
+  .contact-form-subtitle{
+    font-size: 14px;
+  }
+  .contact-form-input{
+    font-size: 13px;
+  }
+  .contact-form textarea{
+    height: 120px;
+  }
+  .contact-form-input{
+    padding-block: 12px;
   }
 }
 
@@ -4957,5 +4910,12 @@
   }
   .gallery-show-more{
     margin-top: 20px;
+  }
+  .testimonial-avatar{
+    height: 40px;
+    width: 40px;
+  }
+  .testimonial-initials{
+    font-size: 14px;
   }
 }

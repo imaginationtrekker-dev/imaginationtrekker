@@ -88,7 +88,7 @@
 /* Mobile - Slider with GSAP */
 @media (max-width: 768px) {
   .package-section-nav {
-    bottom: 1rem;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     max-width: calc(100% - 1rem);
@@ -790,6 +790,11 @@
   position: sticky;
   top: 100px;
   align-self: start;
+}
+
+/* Hide mobile header on desktop */
+.package-mobile-header {
+  display: none;
 }
 
 .package-contact-form-wrapper {
@@ -1532,7 +1537,8 @@
   }
 
   .package-title {
-    font-size: 2rem;
+    font-size:  28px;
+    margin-top: 12px;
   }
 
   .package-section-title {
@@ -1545,41 +1551,71 @@
 
   /* Itinerary Steps Responsive */
   .package-steps-row {
-    padding-left: 50px;
+    padding-left: 30px;
   }
 
   .package-steps-row .package-steps::before {
-    left: -38px;
+    left: -18px;
+    top: 0;
   }
 
   .package-step-item .package-step-line-item-dot {
-    left: -50px;
+    left: -30px;
+    top: 0;
   }
 
   .package-step-item .package-step-title {
-    font-size: 20px;
+    font-size: 16px;
   }
 
   .package-step-description-wrapper.open {
-    padding: 0 20px 20px 20px;
+    padding: 0 12px 12px 12px;
   }
 
   .package-step-item .package-step-description {
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .package-step-item .package-step-header {
-    padding: 20px;
+    padding: 12px;
   }
 
   .package-step-icon-wrapper {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
+  }
+  .package-faq-question{
+    padding-block: 16px;
+  }
+  .package-description{
+    font-size: 16px;
+  }
+  .package-list-text p{
+    font-size: 15px;
+  }
+  .package-content-right{
+    order: -10;
   }
 
+  /* Mobile Only Header in Right Sidebar */
+  .package-mobile-header {
+    display: block;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  /* Hide desktop header on mobile */
+  .package-content-left .package-header {
+    display: none;
+  }
+
+      .package-faq-question{
+        font-size: 16px;
+      }
   .package-step-icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 
   .package-premium-header {
@@ -1840,11 +1876,15 @@
   display: flex;
   gap: 1.5rem;
   will-change: transform;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
 }
 
 .recent-package-card {
   flex: 0 0 calc((100% - 3rem) / 3);
   min-width: 0;
+  max-width: calc((100% - 3rem) / 3);
   background: #ffffff;
   border-radius: 1.5rem;
   overflow: hidden;
@@ -1855,7 +1895,9 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
+  box-sizing: border-box;
+  width: calc((100% - 3rem) / 3);
+  min-height: auto;
 }
 
 .recent-package-card:hover {
@@ -1870,6 +1912,7 @@
   height: 240px;
   overflow: hidden;
   background: #f3f4f6;
+  flex-shrink: 0;
 }
 
 .recent-package-image {
@@ -1887,6 +1930,8 @@
   flex-direction: column;
   flex: 1;
   gap: 1rem;
+  min-height: 0;
+  overflow: visible;
 }
 
 .recent-package-title {
@@ -1915,7 +1960,7 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  flex: 1;
+  flex-shrink: 0;
 }
 
 .recent-package-details {
@@ -2028,6 +2073,9 @@
 
   .recent-package-card {
     flex: 0 0 calc((100% - 1.5rem) / 2);
+    min-width: 0;
+    max-width: calc((100% - 1.5rem) / 2);
+    width: calc((100% - 1.5rem) / 2);
   }
 }
 
@@ -2046,6 +2094,9 @@
 
   .recent-package-card {
     flex: 0 0 100%;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
   }
 .package-meta-item{
   font-size: 13px;
@@ -2053,6 +2104,7 @@
   .recent-packages-nav {
     width: 44px;
     height: 44px;
+    display: none;
   }
 
   .recent-packages-nav-prev {
@@ -2061,5 +2113,95 @@
 
   .recent-packages-nav-next {
     right: 0.25rem;
+  }
+}
+
+/* Recent Packages Navigation Dots */
+.recent-packages-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding: 0 1rem;
+}
+
+.recent-packages-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  background: #d1d5db;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.recent-packages-dot:hover {
+  background: #9ca3af;
+}
+
+.recent-packages-dot.active {
+  background: #1f2937;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* Back to Top Button */
+.back-to-top-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #0d5a6f;
+  border: none;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(13, 90, 111, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+}
+
+.back-to-top-btn.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.back-to-top-btn:hover {
+  background: #0a4757;
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(13, 90, 111, 0.4);
+}
+
+.back-to-top-btn:active {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .back-to-top-btn {
+    bottom: 92px !important;
+    right: 1.5rem;
+      width: 44px;
+    height: 44px;
+  }
+  
+  body .floating-buttons {
+    bottom: 92px !important;
+  }
+  
+  body .floating-whatsapp-btn {
+    bottom: 92px !important;
+    position: fixed;
+    left: 20px;
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { createClient } from '@/lib/supabase-browser';
 import Image from 'next/image';
 import { GalleryUploader } from '@/app/components/GalleryUploader';
@@ -24,6 +25,7 @@ interface Package {
   how_to_reach?: string;
   cancellation_policy?: string;
   refund_policy?: string;
+  safety_for_trek?: string;
   faqs: Array<{ question: string; answer: string }>;
   booking_dates: string[];
   why_choose_us: Array<{ heading: string; description: string }>;
@@ -68,6 +70,7 @@ export default function PackagesPage() {
     how_to_reach: '',
     cancellation_policy: '',
     refund_policy: '',
+    safety_for_trek: '',
     faqs: [] as FAQItem[],
     booking_dates: [] as Date[],
     why_choose_us: [] as ArrayItem[],
@@ -76,8 +79,10 @@ export default function PackagesPage() {
   });
 
   const [activeTab, setActiveTab] = useState<'basic' | 'details' | 'content' | 'media'>('basic');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     loadPackages();
   }, []);
 
@@ -231,6 +236,7 @@ export default function PackagesPage() {
       how_to_reach: '',
       cancellation_policy: '',
       refund_policy: '',
+      safety_for_trek: '',
       faqs: [],
       booking_dates: [],
       why_choose_us: [],
@@ -257,6 +263,7 @@ export default function PackagesPage() {
       how_to_reach: pkg.how_to_reach || '',
       cancellation_policy: pkg.cancellation_policy || '',
       refund_policy: pkg.refund_policy || '',
+      safety_for_trek: pkg.safety_for_trek || '',
       faqs: pkg.faqs || [],
       booking_dates: pkg.booking_dates.map((d: any) => typeof d === 'string' ? new Date(d) : d) || [],
       why_choose_us: pkg.why_choose_us || [],
@@ -430,7 +437,7 @@ export default function PackagesPage() {
       )}
 
       {/* Modal */}
-      {isModalOpen && (
+      {isModalOpen && mounted && typeof window !== 'undefined' && createPortal(
         <div
           style={{
             position: 'fixed',
@@ -442,9 +449,17 @@ export default function PackagesPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 1000,
+            zIndex: 2000,
             overflowY: 'auto',
             padding: '20px',
+            margin: 0,
+            width: '100vw',
+            height: '100vh',
+          }}
+          onClick={() => {
+            setIsModalOpen(false);
+            setEditingPackage(null);
+            resetForm();
           }}
         >
           <div
@@ -453,12 +468,14 @@ export default function PackagesPage() {
               borderRadius: '12px',
               width: '95%',
               maxWidth: '1000px',
+              minWidth: '320px',
               maxHeight: '95vh',
               overflow: 'hidden',
               margin: 'auto',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
               display: 'flex',
               flexDirection: 'column',
+              position: 'relative',
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -836,6 +853,20 @@ export default function PackagesPage() {
                     />
                   </div>
 
+                  {/* Safety for the Trek */}
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                      Safety for the Trek
+                    </label>
+                    <RichTextEditor
+                      value={formData.safety_for_trek}
+                      onChange={(value) => setFormData({ ...formData, safety_for_trek: value })}
+                      placeholder="Enter safety information for the trek..."
+                      hideToolbar={true}
+                      autoBulletList={true}
+                    />
+                  </div>
+
                   {/* Cancellation Policy and Refund Policy in Grid */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                     {/* Cancellation Policy */}
@@ -1041,7 +1072,8 @@ export default function PackagesPage() {
             </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

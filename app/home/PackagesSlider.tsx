@@ -257,7 +257,7 @@ export default function PackagesSlider() {
             <div className="packages-header-left">
               <span className="packages-tag">Packages</span>
               <h2 className="packages-title">
-                TOURS FOR EVERY TYPE OF <span className="packages-title-highlight">TRAVELER</span>
+                TOURS FOR EVERY TYPE OF TRAVELER
               </h2>
             </div>
           </div>
@@ -292,14 +292,16 @@ export default function PackagesSlider() {
             <div className="packages-track" ref={trackRef}>
               {packages.map((pkg, index) => (
                 <div key={pkg.id} className="package-card">
-                  <div className="package-card-image">
-                    <Image
-                      src={pkg.thumbnail_image_url || "/images/package-image.webp"}
-                      alt={pkg.package_name}
-                      fill
-                      className="package-image"
-                    />
-                  </div>
+                  <Link href={`/packages/${pkg.slug}`} className="package-card-image-link">
+                    <div className="package-card-image">
+                      <Image
+                        src={pkg.thumbnail_image_url || "/images/package-image.webp"}
+                        alt={pkg.package_name}
+                        fill
+                        className="package-image"
+                      />
+                    </div>
+                  </Link>
                   <div className="package-card-content">
                     <h3 className="package-card-title">{pkg.package_name}</h3>
                     <p className="package-card-description">

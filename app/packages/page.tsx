@@ -10,6 +10,7 @@ import Link from "next/link";
 import { stripHtmlTags } from "@/lib/utils";
 import { useSearchFilters } from "@/lib/store";
 import "../home/style.css";
+import "./page.css";
 
 interface Package {
   id: string;

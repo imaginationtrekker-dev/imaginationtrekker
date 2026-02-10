@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "./components/SessionProvider";
+import BackToTop from "./components/BackToTop";
 
 export const metadata: Metadata = {
   title: "Imagination Trekker - Adventure Awaits",
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body className="antialiased">
         <SessionProvider>
           {children}
+          <BackToTop />
           <Toaster position="top-right" />
         </SessionProvider>
       </body>

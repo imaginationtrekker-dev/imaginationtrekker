@@ -91,7 +91,7 @@ export default function ContactPage() {
   };
 
   const handleWhatsAppClick = () => {
-    const whatsappNumber = "917060754265";
+    const whatsappNumber = "917817849247";
     const message = encodeURIComponent("Hello! I'm interested in your trekking packages.");
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
   };
@@ -256,8 +256,8 @@ export default function ContactPage() {
                     <Phone size={24} />
                   </div>
                   <h3 className="contact-info-card-title">Phone</h3>
-                  <a href="tel:+917060754265" className="contact-info-link">
-                    +91 70607 54265
+                  <a href="tel:+917817849247" className="contact-info-link">
+                    +91 78178 49247
                   </a>
                   <p className="contact-info-description">Call us for immediate assistance</p>
                 </div>

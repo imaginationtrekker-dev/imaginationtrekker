@@ -69,3 +69,51 @@ h6 {
 .font-fraunces {
   font-family: var(--font-fraunces), "Fraunces", serif;
 }
+
+/* Back to Top Button - Global Styles */
+.back-to-top-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #0d5a6f;
+  border: none;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(13, 90, 111, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+}
+
+.back-to-top-btn.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.back-to-top-btn:hover {
+  background: #0a4757;
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(13, 90, 111, 0.4);
+}
+
+.back-to-top-btn:active {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  body .back-to-top-btn {
+    bottom: 20px;
+    right: 1.5rem;
+    width: 44px;
+    height: 44px;
+  }
+}
