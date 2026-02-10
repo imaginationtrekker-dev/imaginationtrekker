@@ -456,11 +456,6 @@ export default function PackagesPage() {
             width: '100vw',
             height: '100vh',
           }}
-          onClick={() => {
-            setIsModalOpen(false);
-            setEditingPackage(null);
-            resetForm();
-          }}
         >
           <div
             style={{

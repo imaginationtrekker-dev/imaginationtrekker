@@ -587,7 +587,10 @@ export default function PackagesPage() {
                               {pkg.discounted_price ? formatPrice(pkg.discounted_price) : formatPrice(pkg.price)}
                             </span>
                           </div>
-                          <button className="package-book-btn">
+                          <button 
+                            type="button" 
+                            className="package-book-btn"
+                          >
                             <div className="package-book-btn-icon">
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="9 18 15 12 9 6" />

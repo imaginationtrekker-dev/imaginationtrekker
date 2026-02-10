@@ -6,6 +6,7 @@ import Footer from "@/app/components/Footer";
 import FloatingButtons from "@/app/components/FloatingButtons";
 import { MapPin, Phone, Mail, MessageCircle, Send, Clock, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import "./contact.css";
+import "../home/style.css";
 
 interface Toast {
   id: string;

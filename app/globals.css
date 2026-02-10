@@ -41,6 +41,11 @@ h6 {
   font-family: "Plus Jakarta Sans", sans-serif;
 }
 
+
+html,body{
+  overflow-x: hidden;
+}
+
 body,
 p,
 li,

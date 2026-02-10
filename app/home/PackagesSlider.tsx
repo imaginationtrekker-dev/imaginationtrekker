@@ -102,7 +102,11 @@ export default function PackagesSlider() {
     const handleStart = (e: MouseEvent | TouchEvent) => {
       // Don't start drag if clicking on a link or button
       const target = e.target as HTMLElement;
-      if (target.closest('a') || target.closest('button')) {
+      const link = target.closest('a');
+      const button = target.closest('button');
+      
+      if (link || button) {
+        // Allow the link/button to handle the click normally
         return;
       }
       
@@ -116,6 +120,15 @@ export default function PackagesSlider() {
 
     const handleMove = (e: MouseEvent | TouchEvent) => {
       if (!isDraggingState) return;
+      
+      // Check if we're over a link or button - if so, cancel drag
+      const target = e.target as HTMLElement;
+      if (target.closest('a') || target.closest('button')) {
+        isDraggingState = false;
+        setIsDragging(false);
+        hasMovedSignificantly = false;
+        return;
+      }
       
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       const diff = dragStartX - clientX;
@@ -144,6 +157,16 @@ export default function PackagesSlider() {
     };
 
     const handleEnd = (e: MouseEvent | TouchEvent) => {
+      // Check if we're ending on a link or button - if so, allow navigation
+      const target = e.target as HTMLElement;
+      if (target.closest('a') || target.closest('button')) {
+        // Don't prevent default - let the link/button handle the click
+        isDraggingState = false;
+        setIsDragging(false);
+        hasMovedSignificantly = false;
+        return;
+      }
+      
       // If we didn't move significantly, it was a click - allow it to proceed
       if (isDraggingState && !hasMovedSignificantly) {
         // Don't prevent default - let the click event fire
