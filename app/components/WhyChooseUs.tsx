@@ -7,10 +7,12 @@ import { gsap } from "gsap";
 interface ServiceItem {
   title: string;
   description?: string;
-  icon: "itinerary" | "support" | "expertise" | "safety";
+  icon: string;
 }
 
-const services: ServiceItem[] = [
+const DEFAULT_IMAGE = "https://res.cloudinary.com/dtqlkcby9/image/upload/v1770645447/gallery_1770645442271_r1vywp4ljz.jpg";
+
+const DEFAULT_SERVICES: ServiceItem[] = [
   {
     title: "Personalized Itineraries",
     description: "Every Char Dham journey is unique. We craft custom itineraries tailored to your fitness level, spiritual goals, and time constraints. Whether you're seeking a challenging trek to Kedarnath or a serene pilgrimage to Badrinath, our expert team designs routes that match your pace and preferences.",
@@ -34,6 +36,11 @@ const services: ServiceItem[] = [
 ];
 
 const getIcon = (iconType: string) => {
+  if (iconType?.startsWith('http')) {
+    return (
+      <Image src={iconType} alt="" width={20} height={20} style={{ objectFit: 'contain' }} />
+    );
+  }
   switch (iconType) {
     case "itinerary":
       return (
@@ -72,8 +79,26 @@ const getIcon = (iconType: string) => {
 
 export default function WhyChooseUs() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [services, setServices] = useState<ServiceItem[]>(DEFAULT_SERVICES);
+  const [imageUrl, setImageUrl] = useState<string>(DEFAULT_IMAGE);
+  const [loading, setLoading] = useState(true);
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
   const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
+
+  useEffect(() => {
+    fetch('/api/home-why-choose-us')
+      .then((res) => res.json())
+      .then(({ data }) => {
+        if (data?.items?.length) {
+          setServices(data.items);
+        }
+        if (data?.image_url) {
+          setImageUrl(data.image_url);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   const toggleItem = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -165,19 +190,20 @@ export default function WhyChooseUs() {
     });
   }, [openIndex]);
 
-  // Initial animation on mount
+  // Initial animation on mount - use y (vertical) to avoid horizontal overflow
   useEffect(() => {
     itemRefs.current.forEach((item, index) => {
       if (!item) return;
 
       gsap.from(item, {
         opacity: 0,
-        x: -30,
+        y: 20,
         duration: 0.6,
         delay: index * 0.1,
         ease: "power2.out",
+        clearProps: "transform",
         onComplete: () => {
-          gsap.set(item, { opacity: 1 });
+          gsap.set(item, { opacity: 1, clearProps: "all" });
         },
       });
     });
@@ -241,15 +267,16 @@ export default function WhyChooseUs() {
             </ul>
           </div>
 
-          {/* Right Side - Placeholder Image */}
+          {/* Right Side - Image */}
           <div className="why-choose-us-right">
             <div className="why-choose-us-image">
               <Image
-                src="https://res.cloudinary.com/dtqlkcby9/image/upload/v1770645447/gallery_1770645442271_r1vywp4ljz.jpg"
+                src={imageUrl}
                 alt="Char Dham travel experience"
                 width={600}
                 height={800}
                 className="why-choose-us-image-img"
+                sizes="(max-width: 768px) 300px, (max-width: 1024px) 400px, 500px"
               />
             </div>
           </div>

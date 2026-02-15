@@ -18,7 +18,7 @@ export default function Header() {
     { label: "Home", href: "/", hasDropdown: false },
     { label: "Packages", href: "/packages", hasDropdown: false },
     { label: "Gallery", href: "/gallery", hasDropdown: false },
-    { label: "Contact", href: "/contact", hasDropdown: false },
+    { label: "About Us", href: "/about", hasDropdown: false },
   ];
 
   // GSAP glider animation

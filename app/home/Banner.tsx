@@ -9,7 +9,15 @@ import { useSearchFilters } from "@/lib/store";
 import { SearchIcon } from "lucide-react";
 
 // Price Range Slider Component
-function PriceRangeSlider({ minPrice, maxPrice, onPriceChange }: { minPrice: number; maxPrice: number; onPriceChange: (min: number, max: number) => void }) {
+function PriceRangeSlider({
+  minPrice,
+  maxPrice,
+  onPriceChange,
+}: {
+  minPrice: number;
+  maxPrice: number;
+  onPriceChange: (min: number, max: number) => void;
+}) {
   const [localMin, setLocalMin] = useState(minPrice);
   const [localMax, setLocalMax] = useState(maxPrice);
   const maxRange = 100000;
@@ -71,12 +79,14 @@ function PriceRangeSlider({ minPrice, maxPrice, onPriceChange }: { minPrice: num
           className="price-input"
         />
       </div>
-      <div 
+      <div
         className="slider-container"
-        style={{
-          '--slider-min-percent': `${minPercent}%`,
-          '--slider-max-percent': `${maxPercent}%`,
-        } as React.CSSProperties}
+        style={
+          {
+            "--slider-min-percent": `${minPercent}%`,
+            "--slider-max-percent": `${maxPercent}%`,
+          } as React.CSSProperties
+        }
       >
         <input
           type="range"
@@ -103,13 +113,18 @@ function PriceRangeSlider({ minPrice, maxPrice, onPriceChange }: { minPrice: num
 
 export default function Banner() {
   const router = useRouter();
-  const { searchQuery, minPrice, maxPrice, setSearchQuery, setPriceRange } = useSearchFilters();
+  const { searchQuery, minPrice, maxPrice, setSearchQuery, setPriceRange } =
+    useSearchFilters();
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
   const [isBudgetOpen, setIsBudgetOpen] = useState(false);
   const budgetDropdownRef = useRef<HTMLDivElement>(null);
   const budgetMenuRef = useRef<HTMLDivElement>(null);
-  const [budgetMenuPosition, setBudgetMenuPosition] = useState({ top: 0, left: 0, width: 0 });
-  
+  const [budgetMenuPosition, setBudgetMenuPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
+
   // Sync local state with store
   useEffect(() => {
     setLocalSearchQuery(searchQuery);
@@ -119,17 +134,40 @@ export default function Banner() {
   const backgroundRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const heroGirlRef = useRef<HTMLDivElement>(null);
+  const [marqueeTexts, setMarqueeTexts] = useState<
+    Array<{ text: string; link_url: string | null }>
+  >([]);
 
   useEffect(() => {
-    if (!marqueeRef.current) return;
+    const loadMarqueeTexts = async () => {
+      try {
+        const response = await fetch("/api/banner-marquee-texts");
+        if (!response.ok) {
+          return;
+        }
+        const result = await response.json();
+        setMarqueeTexts(result.texts || []);
+      } catch (err) {}
+    };
+
+    loadMarqueeTexts();
+  }, []);
+
+  useEffect(() => {
+    if (!marqueeRef.current || marqueeTexts.length === 0) return;
 
     const marquee = marqueeRef.current;
     const marqueeContent = marquee.querySelector(".marquee-content");
 
     if (!marqueeContent) return;
 
+    // Clear any existing clones
+    const existingClones = marquee.querySelectorAll(".marquee-clone");
+    existingClones.forEach((clone) => clone.remove());
+
     // Clone the content for seamless loop
     const clone = marqueeContent.cloneNode(true) as HTMLElement;
+    clone.classList.add("marquee-clone");
     marquee.appendChild(clone);
 
     // Get the width of the content
@@ -145,55 +183,25 @@ export default function Banner() {
         x: -contentWidth,
         duration: 100,
         ease: "none",
-      }
+      },
     );
 
     return () => {
       tl.kill();
     };
-  }, []);
-
-  useEffect(() => {
-    // Parallax effect on scroll
-    const handleScroll = () => {
-      if (!bannerRef.current || !backgroundRef.current || !contentRef.current || !heroGirlRef.current) return;
-
-      const scrollY = window.scrollY;
-      const bannerHeight = bannerRef.current.offsetHeight;
-
-      if (scrollY < bannerHeight) {
-        // Parallax background - moves slower
-        gsap.to(backgroundRef.current, {
-          y: scrollY * 0.5,
-          duration: 0.3,
-          ease: "none",
-        });
-
-        // Parallax content - moves faster
-        gsap.to(contentRef.current, {
-          y: scrollY * 0.3,
-          duration: 0.3,
-          ease: "none",
-        });
-
-        // Parallax hero girl - moves at medium speed
-        gsap.to(heroGirlRef.current, {
-          y: scrollY * 0.4,
-          duration: 0.3,
-          ease: "none",
-        });
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [marqueeTexts]);
 
   // Close budget dropdown when clicking outside and calculate position
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (budgetDropdownRef.current && !budgetDropdownRef.current.contains(event.target as Node)) {
-        if (budgetMenuRef.current && !budgetMenuRef.current.contains(event.target as Node)) {
+      if (
+        budgetDropdownRef.current &&
+        !budgetDropdownRef.current.contains(event.target as Node)
+      ) {
+        if (
+          budgetMenuRef.current &&
+          !budgetMenuRef.current.contains(event.target as Node)
+        ) {
           setIsBudgetOpen(false);
         }
       }
@@ -225,17 +233,10 @@ export default function Banner() {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSearch();
     }
   };
-
-  const charDhamTexts = [
-    "KEDARNATH",
-    "BADRINATH",
-    "YAMUNOTRI",
-    "GANGOTRI",
-  ];
 
   return (
     <section ref={bannerRef} className="banner-section">
@@ -252,22 +253,43 @@ export default function Banner() {
       </div>
 
       {/* Bottom Text - Marquee Animation with Char Dham Yatra - Behind the girl */}
-      <div className="marquee-container">
-        <div ref={marqueeRef} className="marquee-wrapper">
-          <div className="marquee-content">
-            {charDhamTexts.map((text, index) => (
-              <span
-                key={index}
-                className={`marquee-text ${
-                  index % 2 === 0 ? "white" : "green"
-                }`}
-              >
-                {text}
-              </span>
-            ))}
+      {marqueeTexts.length > 0 && (
+        <div className="marquee-container">
+          <div ref={marqueeRef} className="marquee-wrapper">
+            <div className="marquee-content">
+              {/* Repeat texts multiple times for seamless infinite loop */}
+              {[...marqueeTexts, ...marqueeTexts, ...marqueeTexts].map(
+                (item, index) => {
+                  const textElement = (
+                    <span
+                      key={`${item.text}-${index}`}
+                      className={`marquee-text ${
+                        index % 2 === 0 ? "white" : "green"
+                      }`}
+                    >
+                      {item.text}
+                    </span>
+                  );
+                  return item.link_url ? (
+                    <a
+                      href={item.link_url}
+                      key={`${item.text}-${index}`}
+                      style={{
+                        textDecoration: "none",
+                        display: "inline-block",
+                      }}
+                    >
+                      {textElement}
+                    </a>
+                  ) : (
+                    textElement
+                  );
+                },
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Hero Girl Image */}
       <div ref={heroGirlRef} className="hero-girl-container">
@@ -287,7 +309,8 @@ export default function Banner() {
           Explore Uttarakhand's Treks & Pilgrimages
         </h1>
         <p className="banner-description">
-          Experience the sacred Char Dham and mesmerizing treks in Uttarakhand with our curated journeys.
+          Experience the sacred Char Dham and mesmerizing treks in Uttarakhand
+          with our curated journeys.
         </p>
 
         {/* CTA Buttons */}
@@ -333,14 +356,14 @@ export default function Banner() {
               />
             </div>
             <div className="search-divider"></div>
-            <div 
-              className="search-budget-field" 
+            <div
+              className="search-budget-field"
               ref={budgetDropdownRef}
               onClick={() => setIsBudgetOpen(!isBudgetOpen)}
             >
               <span className="budget-label">
-                {minPrice === 0 && maxPrice === 100000 
-                  ? "Budget Range" 
+                {minPrice === 0 && maxPrice === 100000
+                  ? "Budget Range"
                   : `₹${minPrice.toLocaleString()} - ₹${maxPrice.toLocaleString()}`}
               </span>
               <svg
@@ -350,36 +373,38 @@ export default function Banner() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className={`budget-chevron ${isBudgetOpen ? 'open' : ''}`}
+                className={`budget-chevron ${isBudgetOpen ? "open" : ""}`}
               >
                 <polyline points="6 9 12 15 18 9" />
               </svg>
-              {isBudgetOpen && typeof window !== 'undefined' && createPortal(
-                <div 
-                  ref={budgetMenuRef}
-                  className="banner-budget-dropdown"
-                  style={{
-                    position: 'absolute',
-                    top: `${budgetMenuPosition.top}px`,
-                    left: `${budgetMenuPosition.left}px`,
-                    width: `${budgetMenuPosition.width}px`,
-                    background: '#ffffff',
-                    backgroundColor: '#ffffff',
-                    opacity: 1,
-                    zIndex: 99999,
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <PriceRangeSlider
-                    minPrice={minPrice}
-                    maxPrice={maxPrice}
-                    onPriceChange={(min, max) => {
-                      setPriceRange(min, max);
+              {isBudgetOpen &&
+                typeof window !== "undefined" &&
+                createPortal(
+                  <div
+                    ref={budgetMenuRef}
+                    className="banner-budget-dropdown"
+                    style={{
+                      position: "absolute",
+                      top: `${budgetMenuPosition.top}px`,
+                      left: `${budgetMenuPosition.left}px`,
+                      width: `${budgetMenuPosition.width}px`,
+                      background: "#ffffff",
+                      backgroundColor: "#ffffff",
+                      opacity: 1,
+                      zIndex: 99999,
                     }}
-                  />
-                </div>,
-                document.body
-              )}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <PriceRangeSlider
+                      minPrice={minPrice}
+                      maxPrice={maxPrice}
+                      onPriceChange={(min, max) => {
+                        setPriceRange(min, max);
+                      }}
+                    />
+                  </div>,
+                  document.body,
+                )}
             </div>
             <button className="search-button" onClick={handleSearch}>
               <SearchIcon />

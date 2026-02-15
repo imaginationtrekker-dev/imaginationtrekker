@@ -19,6 +19,10 @@ interface Package {
   package_duration?: string;
   difficulty?: string;
   altitude?: string;
+  departure_and_return_location?: string;
+  departure_time?: string;
+  trek_length?: string;
+  base_camp?: string;
   itinerary: Array<{ heading: string; description: string }>;
   inclusions?: string;
   exclusions?: string;
@@ -64,6 +68,10 @@ export default function PackagesPage() {
     package_duration: '',
     difficulty: '',
     altitude: '',
+    departure_and_return_location: '',
+    departure_time: '',
+    trek_length: '',
+    base_camp: '',
     itinerary: [] as ArrayItem[],
     inclusions: '',
     exclusions: '',
@@ -184,7 +192,7 @@ export default function PackagesPage() {
 
       const packageData = {
         ...formData,
-        slug: slug || formData.slug, // Always use generated slug
+        slug: slug || formData.slug,
         booking_dates: bookingDatesStrings,
         price: formData.price || null,
         discounted_price: formData.discounted_price || null,
@@ -230,6 +238,10 @@ export default function PackagesPage() {
       package_duration: '',
       difficulty: '',
       altitude: '',
+      departure_and_return_location: '',
+      departure_time: '',
+      trek_length: '',
+      base_camp: '',
       itinerary: [],
       inclusions: '',
       exclusions: '',
@@ -257,6 +269,10 @@ export default function PackagesPage() {
       package_duration: pkg.package_duration || '',
       difficulty: pkg.difficulty || '',
       altitude: pkg.altitude || '',
+      departure_and_return_location: pkg.departure_and_return_location || '',
+      departure_time: pkg.departure_time || '',
+      trek_length: pkg.trek_length || '',
+      base_camp: pkg.base_camp || '',
       itinerary: pkg.itinerary || [],
       inclusions: pkg.inclusions || '',
       exclusions: pkg.exclusions || '',
@@ -701,6 +717,60 @@ export default function PackagesPage() {
                       />
                     </div>
                   </div>
+
+                  {/* Departure and Return Location */}
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                      Departure and Return Location
+                    </label>
+                    <input
+                      type='text'
+                      value={formData.departure_and_return_location}
+                      onChange={(e) => setFormData({ ...formData, departure_and_return_location: e.target.value })}
+                      style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '14px', color: '#1f2937', background: '#fff' }}
+                      placeholder="e.g., Mumbai / Dehradun"
+                    />
+                  </div>
+
+                  {/* Departure Time, Trek Length, Base Camp */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                        Departure Time
+                      </label>
+                      <input
+                        type='text'
+                        value={formData.departure_time}
+                        onChange={(e) => setFormData({ ...formData, departure_time: e.target.value })}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '14px', color: '#1f2937', background: '#fff' }}
+                        placeholder="e.g., 6:00 AM"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                        Trek Length
+                      </label>
+                      <input
+                        type='text'
+                        value={formData.trek_length}
+                        onChange={(e) => setFormData({ ...formData, trek_length: e.target.value })}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '14px', color: '#1f2937', background: '#fff' }}
+                        placeholder="e.g., 16 km"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                        Base Camp
+                      </label>
+                      <input
+                        type='text'
+                        value={formData.base_camp}
+                        onChange={(e) => setFormData({ ...formData, base_camp: e.target.value })}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '14px', color: '#1f2937', background: '#fff' }}
+                        placeholder="e.g., Gaurikund"
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -857,8 +927,6 @@ export default function PackagesPage() {
                       value={formData.safety_for_trek}
                       onChange={(value) => setFormData({ ...formData, safety_for_trek: value })}
                       placeholder="Enter safety information for the trek..."
-                      hideToolbar={true}
-                      autoBulletList={true}
                     />
                   </div>
 

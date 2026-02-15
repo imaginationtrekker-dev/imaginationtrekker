@@ -5,7 +5,7 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import FloatingButtons from "@/app/components/FloatingButtons";
 import { createClient } from "@/lib/supabase-browser";
-import "@/app/home/style.css";
+import "@/app/policy.css";
 
 interface CancellationPolicy {
   id: string;

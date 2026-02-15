@@ -7,7 +7,6 @@ import { gsap } from "gsap";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import FloatingButtons from "../components/FloatingButtons";
-import "../home/style.css";
 import "./gallery.css";
 
 interface GalleryImage {
@@ -56,7 +55,6 @@ export default function GalleryPage() {
       // Initially show first page
       setDisplayedImages((data || []).slice(0, imagesPerPage));
     } catch (err: any) {
-      console.error("Error loading gallery images:", err);
       setAllImages([]);
       setDisplayedImages([]);
     } finally {
@@ -77,7 +75,8 @@ export default function GalleryPage() {
 
   // GSAP animations for gallery items on load
   useEffect(() => {
-    if (loading || displayedImages.length === 0 || !galleryGridRef.current) return;
+    if (loading || displayedImages.length === 0 || !galleryGridRef.current)
+      return;
 
     const items = itemRefs.current.filter(Boolean) as HTMLElement[];
     if (items.length === 0) return;
@@ -109,10 +108,12 @@ export default function GalleryPage() {
   // GSAP hover animations
   useEffect(() => {
     const items = itemRefs.current.filter(Boolean) as HTMLElement[];
-    
+
     items.forEach((item) => {
       const image = item.querySelector(".gallery-page-image") as HTMLElement;
-      const overlay = item.querySelector(".gallery-page-overlay") as HTMLElement;
+      const overlay = item.querySelector(
+        ".gallery-page-overlay",
+      ) as HTMLElement;
 
       const handleMouseEnter = () => {
         gsap.to(image, {
@@ -163,7 +164,7 @@ export default function GalleryPage() {
   const openLightbox = (index: number) => {
     // Find the actual index in allImages array
     const imageId = displayedImages[index].id;
-    const actualIndex = allImages.findIndex(img => img.id === imageId);
+    const actualIndex = allImages.findIndex((img) => img.id === imageId);
     setSelectedImageIndex(actualIndex >= 0 ? actualIndex : index);
     setLightboxOpen(true);
     document.body.style.overflow = "hidden";
@@ -175,11 +176,15 @@ export default function GalleryPage() {
   };
 
   const goToNext = () => {
-    setSelectedImageIndex((prev) => (prev >= allImages.length - 1 ? 0 : prev + 1));
+    setSelectedImageIndex((prev) =>
+      prev >= allImages.length - 1 ? 0 : prev + 1,
+    );
   };
 
   const goToPrev = () => {
-    setSelectedImageIndex((prev) => (prev <= 0 ? allImages.length - 1 : prev - 1));
+    setSelectedImageIndex((prev) =>
+      prev <= 0 ? allImages.length - 1 : prev - 1,
+    );
   };
 
   // GSAP animation for lightbox image change
@@ -189,7 +194,7 @@ export default function GalleryPage() {
     gsap.fromTo(
       lightboxImageRef.current,
       { opacity: 0, scale: 0.9 },
-      { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }
+      { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" },
     );
   }, [selectedImageIndex, lightboxOpen]);
 
@@ -201,9 +206,13 @@ export default function GalleryPage() {
       if (e.key === "Escape") {
         closeLightbox();
       } else if (e.key === "ArrowRight") {
-        setSelectedImageIndex((prev) => (prev >= allImages.length - 1 ? 0 : prev + 1));
+        setSelectedImageIndex((prev) =>
+          prev >= allImages.length - 1 ? 0 : prev + 1,
+        );
       } else if (e.key === "ArrowLeft") {
-        setSelectedImageIndex((prev) => (prev <= 0 ? allImages.length - 1 : prev - 1));
+        setSelectedImageIndex((prev) =>
+          prev <= 0 ? allImages.length - 1 : prev - 1,
+        );
       }
     };
 
@@ -249,7 +258,11 @@ export default function GalleryPage() {
                       <div className="gallery-page-image-wrapper">
                         <Image
                           src={image.image_url}
-                          alt={image.alt_text || image.title || `Gallery image ${index + 1}`}
+                          alt={
+                            image.alt_text ||
+                            image.title ||
+                            `Gallery image ${index + 1}`
+                          }
                           width={800}
                           height={600}
                           className="gallery-page-image"
@@ -271,7 +284,9 @@ export default function GalleryPage() {
                             <path d="m21 21-4.35-4.35"></path>
                           </svg>
                           {image.title && (
-                            <p className="gallery-page-item-title">{image.title}</p>
+                            <p className="gallery-page-item-title">
+                              {image.title}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -310,7 +325,8 @@ export default function GalleryPage() {
                       )}
                     </button>
                     <p className="gallery-page-count">
-                      Showing {displayedImages.length} of {allImages.length} images
+                      Showing {displayedImages.length} of {allImages.length}{" "}
+                      images
                     </p>
                   </div>
                 )}
@@ -322,11 +338,7 @@ export default function GalleryPage() {
 
       {/* Lightbox Modal with Slider */}
       {lightboxOpen && allImages.length > 0 && (
-        <div
-          className="lightbox-overlay"
-          onClick={closeLightbox}
-          tabIndex={0}
-        >
+        <div className="lightbox-overlay" onClick={closeLightbox} tabIndex={0}>
           <button
             className="lightbox-close"
             onClick={closeLightbox}
@@ -401,7 +413,11 @@ export default function GalleryPage() {
           >
             <Image
               src={allImages[selectedImageIndex].image_url}
-              alt={allImages[selectedImageIndex].alt_text || allImages[selectedImageIndex].title || `Gallery image ${selectedImageIndex + 1}`}
+              alt={
+                allImages[selectedImageIndex].alt_text ||
+                allImages[selectedImageIndex].title ||
+                `Gallery image ${selectedImageIndex + 1}`
+              }
               width={1200}
               height={800}
               className="lightbox-image"

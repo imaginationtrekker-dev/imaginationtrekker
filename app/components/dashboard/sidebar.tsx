@@ -62,6 +62,54 @@ export function Sidebar() {
           </div>
         </Link>
 
+        {/* Offer Banners */}
+        <Link href='/dashboard/offer-banners' className={`sidebar_item ${pathname === '/dashboard/offer-banners' ? 'active' : ''}`}>
+          <div className='sidebar_item_content'>
+            <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+              <rect width='18' height='18' x='3' y='3' rx='2' ry='2'></rect>
+              <path d='M3 9h18'></path>
+              <path d='M9 21V9'></path>
+            </svg>
+            <span>Offer Banners</span>
+          </div>
+        </Link>
+
+        {/* Banner Marquee Texts */}
+        <Link href='/dashboard/banner-marquee-texts' className={`sidebar_item ${pathname === '/dashboard/banner-marquee-texts' ? 'active' : ''}`}>
+          <div className='sidebar_item_content'>
+            <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+              <path d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'></path>
+              <path d='M8 7h6'></path>
+              <path d='M8 11h6'></path>
+            </svg>
+            <span>Banner Marquee Texts</span>
+          </div>
+        </Link>
+
+        {/* Why Choose Us */}
+        <Link href='/dashboard/why-choose-us' className={`sidebar_item ${pathname === '/dashboard/why-choose-us' ? 'active' : ''}`}>
+          <div className='sidebar_item_content'>
+            <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+              <path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'></path>
+              <path d='M9 12l2 2 4-4'></path>
+            </svg>
+            <span>Why Choose Us</span>
+          </div>
+        </Link>
+
+        {/* About Page */}
+        <Link href='/dashboard/about-page' className={`sidebar_item ${pathname === '/dashboard/about-page' ? 'active' : ''}`}>
+          <div className='sidebar_item_content'>
+            <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+              <path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'></path>
+              <circle cx='9' cy='7' r='4'></circle>
+              <path d='M22 21v-2a4 4 0 0 0-3-3.87'></path>
+              <path d='M16 3.13a4 4 0 0 1 0 7.75'></path>
+            </svg>
+            <span>About Page</span>
+          </div>
+        </Link>
+
         {/* ACTIVITY Section */}
         <div className='sidebar_section'>
           <span className='sidebar_section_title'>ACTIVITY</span>

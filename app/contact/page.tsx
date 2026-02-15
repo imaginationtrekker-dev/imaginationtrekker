@@ -4,9 +4,18 @@ import { useState, FormEvent, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import FloatingButtons from "@/app/components/FloatingButtons";
-import { MapPin, Phone, Mail, MessageCircle, Send, Clock, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  MessageCircle,
+  Send,
+  Clock,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import "./contact.css";
-import "../home/style.css";
 
 interface Toast {
   id: string;
@@ -46,7 +55,7 @@ export default function ContactPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -63,8 +72,11 @@ export default function ContactPage() {
       }
 
       // Show success toast
-      showToast(result.message || "Thank you! We'll get back to you within 24 hours.", "success");
-      
+      showToast(
+        result.message || "Thank you! We'll get back to you within 24 hours.",
+        "success",
+      );
+
       // Reset form
       setFormData({
         fullName: "",
@@ -74,16 +86,18 @@ export default function ContactPage() {
         message: "",
       });
     } catch (error: any) {
-      console.error("Error submitting form:", error);
       // Show error toast
-      showToast(error.message || "Failed to submit enquiry. Please try again.", "error");
+      showToast(
+        error.message || "Failed to submit enquiry. Please try again.",
+        "error",
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setFormData({
       ...formData,
@@ -93,21 +107,24 @@ export default function ContactPage() {
 
   const handleWhatsAppClick = () => {
     const whatsappNumber = "917817849247";
-    const message = encodeURIComponent("Hello! I'm interested in your trekking packages.");
+    const message = encodeURIComponent(
+      "Hello! I'm interested in your trekking packages.",
+    );
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
   };
 
   return (
     <main className="contact-page">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="contact-hero">
         <div className="contact-hero-overlay"></div>
         <div className="contact-hero-content">
           <h1 className="contact-hero-title">Get in Touch</h1>
           <p className="contact-hero-subtitle">
-            Have questions about our trekking packages? We're here to help you plan your perfect adventure.
+            Have questions about our trekking packages? We're here to help you
+            plan your perfect adventure.
           </p>
         </div>
       </section>
@@ -121,14 +138,22 @@ export default function ContactPage() {
               <div className="contact-form-header">
                 <h2 className="contact-form-title">Send us a Message</h2>
                 <p className="contact-form-subtitle">
-                  Fill out the form below and we'll get back to you within 24 hours
+                  Fill out the form below and we'll get back to you within 24
+                  hours
                 </p>
               </div>
 
               <form className="contact-form" onSubmit={handleSubmit}>
                 <div className="contact-form-group">
                   <label className="contact-form-label">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                       <circle cx="12" cy="7" r="4"></circle>
                     </svg>
@@ -147,7 +172,14 @@ export default function ContactPage() {
 
                 <div className="contact-form-group">
                   <label className="contact-form-label">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                       <polyline points="22,6 12,13 2,6"></polyline>
                     </svg>
@@ -198,7 +230,14 @@ export default function ContactPage() {
 
                 <div className="contact-form-group">
                   <label className="contact-form-label">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     </svg>
                     Message *
@@ -214,8 +253,8 @@ export default function ContactPage() {
                   />
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="contact-form-submit"
                   disabled={isSubmitting}
                 >
@@ -233,8 +272,22 @@ export default function ContactPage() {
                 </button>
 
                 <p className="contact-form-privacy">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <rect
+                      x="3"
+                      y="11"
+                      width="18"
+                      height="11"
+                      rx="2"
+                      ry="2"
+                    ></rect>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                   </svg>
                   Your information is secure and will not be shared
@@ -260,7 +313,9 @@ export default function ContactPage() {
                   <a href="tel:+917817849247" className="contact-info-link">
                     +91 78178 49247
                   </a>
-                  <p className="contact-info-description">Call us for immediate assistance</p>
+                  <p className="contact-info-description">
+                    Call us for immediate assistance
+                  </p>
                 </div>
 
                 <div className="contact-info-card">
@@ -268,10 +323,15 @@ export default function ContactPage() {
                     <Mail size={24} />
                   </div>
                   <h3 className="contact-info-card-title">Email</h3>
-                  <a href="mailto:info@imaginationtrekker.com" className="contact-info-link">
-                    info@imaginationtrekker.com
+                  <a
+                    href="mailto:imaginationtrekker@gmail.com"
+                    className="contact-info-link"
+                  >
+                    imaginationtrekker@gmail.com
                   </a>
-                  <p className="contact-info-description">Send us an email anytime</p>
+                  <p className="contact-info-description">
+                    Send us an email anytime
+                  </p>
                 </div>
 
                 <div className="contact-info-card">
@@ -279,13 +339,15 @@ export default function ContactPage() {
                     <MessageCircle size={24} />
                   </div>
                   <h3 className="contact-info-card-title">WhatsApp</h3>
-                  <button 
+                  <button
                     onClick={handleWhatsAppClick}
                     className="contact-info-link-button"
                   >
                     Chat with us on WhatsApp
                   </button>
-                  <p className="contact-info-description">Quick response guaranteed</p>
+                  <p className="contact-info-description">
+                    Quick response guaranteed
+                  </p>
                 </div>
               </div>
             </div>
@@ -312,7 +374,14 @@ export default function ContactPage() {
             onClick={() => setToast(null)}
             aria-label="Close toast"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>

@@ -1,0 +1,184 @@
+/* ============================================
+   POLICY PAGES (Privacy, Terms, Cancellation)
+   ============================================ */
+
+.policy-page-section {
+  width: 100%;
+  background: #ffffff;
+  padding: 6rem 0;
+  min-height: 100vh;
+}
+
+.policy-page-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.policy-content {
+  width: 100%;
+}
+
+.policy-main-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.2;
+  font-family: var(--font-fraunces), "Fraunces", serif;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+}
+
+.policy-subtitle {
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: #6b7280;
+  line-height: 1.6;
+  font-family: var(--font-jakarta);
+  margin: 0 0 2.5rem 0;
+  text-align: center;
+}
+
+.policy-main-content {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #374151;
+  line-height: 1.8;
+  font-family: var(--font-jakarta);
+  margin: 0 0 3rem 0;
+}
+
+.policy-main-content h1,
+.policy-main-content h2,
+.policy-main-content h3,
+.policy-main-content h4,
+.policy-main-content h5,
+.policy-main-content h6 {
+  font-family: var(--font-fraunces), "Fraunces", serif;
+  color: #1f2937;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.policy-main-content h1 {
+  font-size: 2rem;
+}
+
+.policy-main-content h2 {
+  font-size: 1.75rem;
+}
+
+.policy-main-content h3 {
+  font-size: 1.5rem;
+}
+
+.policy-main-content p {
+  margin-bottom: 1.25rem;
+  color: #374151;
+}
+
+.policy-main-content ul,
+.policy-main-content ol {
+  margin: 1.25rem 0;
+  padding-left: 2rem;
+}
+
+.policy-main-content li {
+  margin-bottom: 0.75rem;
+  color: #374151;
+}
+
+.policy-main-content strong {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.policy-main-content a {
+  color: #0d5a6f;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.policy-main-content a:hover {
+  color: #0a4757;
+}
+
+.policy-updated {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  font-family: var(--font-jakarta);
+  margin: 3rem 0 0 0;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.policy-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+}
+
+.policy-loading .loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #0d5a6f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.policy-loading p {
+  color: #6b7280;
+  font-family: var(--font-jakarta);
+  font-size: 1rem;
+}
+
+.policy-empty {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.policy-empty .policy-main-title {
+  margin-bottom: 1rem;
+}
+
+.policy-empty p {
+  color: #6b7280;
+  font-family: var(--font-jakarta);
+  font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  .policy-page-section {
+    padding: 4rem 0;
+  }
+
+  .policy-main-title {
+    font-size: 2rem;
+  }
+
+  .policy-subtitle {
+    font-size: 1.125rem;
+  }
+
+  .policy-main-content {
+    font-size: 0.9375rem;
+  }
+
+  .policy-main-content h1 {
+    font-size: 1.75rem;
+  }
+
+  .policy-main-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .policy-main-content h3 {
+    font-size: 1.25rem;
+  }
+}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./shared.css";
 import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "./components/SessionProvider";
 import BackToTop from "./components/BackToTop";

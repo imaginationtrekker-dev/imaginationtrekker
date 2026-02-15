@@ -2,8 +2,7 @@
 @import "react-day-picker/dist/style.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+
   --font-fraunces: "Fraunces", serif;
   --font-jakarta: "Plus Jakarta Sans", sans-serif;
 }
@@ -15,14 +14,7 @@
   --font-body: var(--font-jakarta);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground: #ededed;
-  }
-}
-
 body {
-  color: var(--foreground);
   font-family: var(--font-jakarta);
 }
 
@@ -42,7 +34,8 @@ h6 {
 }
 
 
-html,body{
+html,
+body {
   overflow-x: hidden;
 }
 
@@ -79,7 +72,7 @@ h6 {
 .back-to-top-btn {
   position: fixed;
   bottom: 20px;
-  right: 20px;
+  left: 20px;
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -117,7 +110,7 @@ h6 {
 @media (max-width: 768px) {
   body .back-to-top-btn {
     bottom: 20px;
-    right: 1.5rem;
+    left: 1.5rem;
     width: 44px;
     height: 44px;
   }
