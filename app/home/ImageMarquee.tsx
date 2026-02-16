@@ -8,6 +8,7 @@ interface OfferBanner {
   id: string;
   image_url: string;
   alt_title: string | null;
+  link_url: string | null;
   sort_order: number;
 }
 
@@ -103,8 +104,8 @@ export default function ImageMarquee() {
       <div className="image-marquee-container">
         <div ref={marqueeRef} className="image-marquee-wrapper">
           <div className="image-marquee-content">
-            {repeatedBanners.map((banner, index) => (
-              <div key={`${banner.id}-${index}`} className="image-marquee-item">
+            {repeatedBanners.map((banner, index) => {
+              const bannerContent = (
                 <Image
                   src={banner.image_url}
                   alt={banner.alt_title || `Offer banner ${index + 1}`}
@@ -113,8 +114,24 @@ export default function ImageMarquee() {
                   className="image-marquee-img"
                   unoptimized
                 />
-              </div>
-            ))}
+              );
+              return banner.link_url ? (
+                <a
+                  key={`${banner.id}-${index}`}
+                  href={banner.link_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="image-marquee-item"
+                  style={{ display: 'block' }}
+                >
+                  {bannerContent}
+                </a>
+              ) : (
+                <div key={`${banner.id}-${index}`} className="image-marquee-item">
+                  {bannerContent}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

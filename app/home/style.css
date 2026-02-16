@@ -4327,3 +4327,121 @@
     padding-block: 12px;
   }
 }
+
+/* ============================================
+   RECOGNITIONS SECTION
+   ============================================ */
+
+.recognitions-section {
+  padding: 3.5rem 0;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+}
+
+.recognitions-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.recognitions-title {
+  text-align: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 2.5rem;
+  font-family: var(--font-fraunces), "Fraunces", serif;
+}
+
+.recognitions-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.recognitions-marquee-wrapper {
+  overflow: hidden;
+  width: 100%;
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.recognitions-marquee-track {
+  display: flex;
+  width: max-content;
+}
+
+.recognitions-marquee-content {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  padding: 0 1.5rem;
+}
+
+.recognition-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.recognition-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.recognition-item:hover {
+  transform: translateY(-2px);
+}
+
+.recognition-logo {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: grayscale(0.2);
+  transition: filter 0.3s ease;
+}
+
+.recognition-item:hover .recognition-logo {
+  filter: grayscale(0);
+}
+
+.recognition-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-family: var(--font-jakarta);
+  font-weight: 500;
+  text-align: center;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+  .recognitions-section {
+    padding: 2.5rem 0;
+  }
+
+  .recognitions-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .recognitions-grid {
+    gap: 2rem;
+  }
+
+  .recognitions-marquee-content {
+    gap: 2rem;
+  }
+
+  .recognition-logo {
+    height: 44px;
+  }
+}

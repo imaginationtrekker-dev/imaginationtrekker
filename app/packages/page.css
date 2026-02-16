@@ -4,7 +4,7 @@
 .packages-page-banner {
   position: relative;
   width: 100%;
-  height: 400px;
+  height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -388,6 +388,7 @@
     transform: translateY(-10px);
     opacity: 1 !important;
   }
+
   to {
     transform: translateY(0);
     opacity: 1 !important;
@@ -974,10 +975,15 @@
     animation: fadeIn 0.3s ease;
   }
 
+  .package-card-title {
+    min-height: max-content !important;
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
     }
+
     to {
       opacity: 1;
     }

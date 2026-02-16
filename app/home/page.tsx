@@ -11,6 +11,7 @@ import Gallery from "../components/Gallery";
 import Banner from "./Banner";
 import ImageMarquee from "./ImageMarquee";
 import PackagesSlider from "./PackagesSlider";
+import Recognitions from "./Recognitions";
 import ContactModal from "../components/ContactModal";
 
 export default function Home() {
@@ -35,6 +36,7 @@ export default function Home() {
       <Testimonials />
       <Gallery />
       <FAQ />
+      <Recognitions />
       <Footer />
       <FloatingButtons />
       <ContactModal 

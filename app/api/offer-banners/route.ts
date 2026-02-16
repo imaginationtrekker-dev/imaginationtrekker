@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('offer_banners')
-      .select('id, image_url, alt_title, sort_order')
+      .select('id, image_url, alt_title, link_url, sort_order')
       .eq('is_active', true)
       .order('sort_order', { ascending: true });
 

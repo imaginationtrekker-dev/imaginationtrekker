@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ContactModal from "@/app/components/ContactModal";
+import PdfDownloadModal from "@/app/components/PdfDownloadModal";
 import { gsap } from "gsap";
 import {
   FileText,
@@ -29,6 +30,7 @@ interface PackageData {
   package_description: string | null;
   gallery_images: string[] | null;
   thumbnail_image_url: string | null;
+  document_url: string | null;
   package_duration: string | null;
   difficulty: string | null;
   altitude: string | null;
@@ -151,6 +153,7 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [expandedItinerary, setExpandedItinerary] = useState<number | null>(null);
   const [activeSection, setActiveSection] = useState<string>("");
@@ -307,19 +310,16 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
     const nav = navRef.current;
     if (!gallery || !nav || sections.length === 0) return;
 
-    const STICKY_GAP = 16; // gap below header when sticky
     let rafId: number | null = null;
 
     const updateSticky = () => {
-      const headerEl = document.querySelector(".header") as HTMLElement | null;
-      const headerH = headerEl?.offsetHeight ?? 92;
-      const stickyTop = headerH + STICKY_GAP;
-      nav.style.setProperty("--package-section-nav-top", `${stickyTop}px`);
+      const NAV_TOP = 0;
+      nav.style.setProperty("--package-section-nav-top", `${NAV_TOP}px`);
 
       const galleryRect = gallery.getBoundingClientRect();
       const galleryBottom = galleryRect.bottom;
       // Stick when gallery bottom has scrolled past the sticky position
-      const shouldStick = galleryBottom <= stickyTop;
+      const shouldStick = galleryBottom <= NAV_TOP;
 
       if (isNavStickyRef.current !== shouldStick) {
         isNavStickyRef.current = shouldStick;
@@ -571,7 +571,8 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
 
     const sidebar = sidebarRef.current;
     const container = sidebarContainerRef.current;
-    const STICKY_TOP = 20;
+    const nav = navRef.current;
+    const NAV_SIDEBAR_GAP = 20;
     let rafId: number | null = null;
 
     const updateSidebarPosition = () => {
@@ -584,6 +585,9 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
         return;
       }
 
+      const navHeight = nav?.offsetHeight ?? 56;
+      const SIDEBAR_TOP = navHeight + NAV_SIDEBAR_GAP;
+
       const containerRect = container.getBoundingClientRect();
       const scrollTop =
         window.pageYOffset || document.documentElement.scrollTop;
@@ -593,14 +597,14 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
       const sidebarWidth = sidebar.offsetWidth;
 
       // Calculate sticky boundaries
-      const stickyStart = containerTop - STICKY_TOP;
-      const stickyEnd = containerBottom - sidebarHeight - STICKY_TOP;
+      const stickyStart = containerTop - SIDEBAR_TOP;
+      const stickyEnd = containerBottom - sidebarHeight - SIDEBAR_TOP;
 
       if (scrollTop >= stickyStart && scrollTop <= stickyEnd) {
-        // Fixed position - sidebar sticks
+        // Fixed position - sidebar sticks below nav bar
         const containerRight = containerRect.right;
         sidebar.style.position = "fixed";
-        sidebar.style.top = `${STICKY_TOP}px`;
+        sidebar.style.top = `${SIDEBAR_TOP}px`;
         sidebar.style.right = `${window.innerWidth - containerRight}px`;
         sidebar.style.width = `${sidebarWidth}px`;
       } else if (scrollTop < stickyStart) {
@@ -1688,30 +1692,29 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="package-action-buttons">
-                  <button
-                    type="button"
-                    className="package-download-btn"
-                    onClick={() => {
-                      // TODO: Implement PDF download
-                      alert("PDF download feature coming soon!");
-                    }}
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
+                {packageData.document_url && (
+                  <div className="package-action-buttons">
+                    <button
+                      type="button"
+                      className="package-download-btn"
+                      onClick={() => setIsPdfModalOpen(true)}
                     >
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                      <polyline points="7 10 12 15 17 10"></polyline>
-                      <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    <span>Download PDF</span>
-                  </button>
-                </div>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                      <span>Download PDF</span>
+                    </button>
+                  </div>
+                )}
 
                 {/* Package Details Section */}
                 <div className="package-details-section">
@@ -1944,6 +1947,15 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
         isOpen={isContactModalOpen}
         onClose={() => setIsContactModalOpen(false)}
       />
+
+      {packageData.document_url && (
+        <PdfDownloadModal
+          isOpen={isPdfModalOpen}
+          onClose={() => setIsPdfModalOpen(false)}
+          pdfUrl={packageData.document_url}
+          packageName={packageData.package_name}
+        />
+      )}
 
       {/* Recent Packages Slider */}
       <RecentPackagesSlider currentPackageId={packageData.id} />

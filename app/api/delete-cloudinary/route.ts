@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { publicId } = await request.json();
+    const { publicId, resourceType = 'image' } = await request.json();
 
     if (!publicId) {
       return NextResponse.json({ error: 'Public ID is required' }, { status: 400 });
     }
 
-    // Delete from Cloudinary
-    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/destroy`;
+    // Delete from Cloudinary - support both image and raw (PDF) resource types
+    const resource = resourceType === 'raw' ? 'raw' : 'image';
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/${resource}/destroy`;
     
     const formData = new FormData();
     formData.append('public_id', publicId);

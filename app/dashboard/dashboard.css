@@ -480,8 +480,10 @@
   margin: 0;
   width: 100%;
   flex: 1;
-  min-height: 0; /* Allow flex child to shrink so overflow-y works */
-  overflow-y: auto; /* Scroll content when it exceeds viewport */
+  min-height: 0;
+  /* Allow flex child to shrink so overflow-y works */
+  overflow-y: auto;
+  /* Scroll content when it exceeds viewport */
 }
 
 .main-content {
@@ -690,6 +692,10 @@
   overflow-x: hidden;
   overflow-y: visible;
   max-width: 100%;
+}
+
+.header .header_left .header_menu_btn {
+  padding-inline: 0;
 }
 
 .enquiries-filters {

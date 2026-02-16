@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { GalleryUploader } from '@/app/components/GalleryUploader';
 import { DatePicker } from '@/app/components/DatePicker';
 import { RichTextEditor } from '@/app/components/RichTextEditor';
-import { FileText, Images, PenTool, Settings } from 'lucide-react';
+import { FileText, FileUp, Images, PenTool, Settings } from 'lucide-react';
 
 interface Package {
   id: string;
@@ -16,6 +16,8 @@ interface Package {
   package_description?: string;
   gallery_images: string[];
   thumbnail_image_url?: string;
+  document_url?: string;
+  document_cloudinary_public_id?: string;
   package_duration?: string;
   difficulty?: string;
   altitude?: string;
@@ -57,7 +59,10 @@ export default function PackagesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [uploadingDocument, setUploadingDocument] = useState(false);
+  const [pdfDeliveryBlocked, setPdfDeliveryBlocked] = useState(false);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     package_name: '',
@@ -65,6 +70,8 @@ export default function PackagesPage() {
     package_description: '',
     gallery_images: [] as string[],
     thumbnail_image_url: '',
+    document_url: '',
+    document_cloudinary_public_id: '',
     package_duration: '',
     difficulty: '',
     altitude: '',
@@ -166,6 +173,52 @@ export default function PackagesPage() {
     }
   };
 
+  const handleDocumentUpload = async (file: File) => {
+    try {
+      setUploadingDocument(true);
+      setError(null);
+      setPdfDeliveryBlocked(false);
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+
+      const uploadResponse = await fetch('/api/upload-cloudinary-pdf', {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      if (!uploadResponse.ok) {
+        const errData = await uploadResponse.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to upload PDF');
+      }
+
+      const { url, publicId, deliveryBlocked } = await uploadResponse.json();
+      setFormData(prev => ({
+        ...prev,
+        document_url: url,
+        document_cloudinary_public_id: publicId,
+      }));
+      if (deliveryBlocked) {
+        setPdfDeliveryBlocked(true);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to upload PDF');
+    } finally {
+      setUploadingDocument(false);
+    }
+  };
+
+  const deleteDocumentFromCloudinary = async (publicId: string) => {
+    try {
+      await fetch('/api/delete-cloudinary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publicId, resourceType: 'raw' }),
+      });
+    } catch (e) {
+      console.error('Failed to delete PDF from Cloudinary:', e);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -190,12 +243,23 @@ export default function PackagesPage() {
         throw new Error('Please enter a valid price.');
       }
 
+      // When editing: if replacing PDF, delete old one from Cloudinary for optimal space
+      if (editingPackage?.document_cloudinary_public_id) {
+        const oldPublicId = editingPackage.document_cloudinary_public_id;
+        const newPublicId = formData.document_cloudinary_public_id;
+        if (oldPublicId && (!newPublicId || oldPublicId !== newPublicId)) {
+          await deleteDocumentFromCloudinary(oldPublicId);
+        }
+      }
+
       const packageData = {
         ...formData,
         slug: slug || formData.slug,
         booking_dates: bookingDatesStrings,
         price: formData.price || null,
         discounted_price: formData.discounted_price || null,
+        document_url: formData.document_url || null,
+        document_cloudinary_public_id: formData.document_cloudinary_public_id || null,
       };
 
       if (editingPackage) {
@@ -229,12 +293,15 @@ export default function PackagesPage() {
   };
 
   const resetForm = () => {
+    setPdfDeliveryBlocked(false);
     setFormData({
       package_name: '',
       slug: '',
       package_description: '',
       gallery_images: [],
       thumbnail_image_url: '',
+      document_url: '',
+      document_cloudinary_public_id: '',
       package_duration: '',
       difficulty: '',
       altitude: '',
@@ -266,6 +333,8 @@ export default function PackagesPage() {
       package_description: pkg.package_description || '',
       gallery_images: pkg.gallery_images || [],
       thumbnail_image_url: pkg.thumbnail_image_url || '',
+      document_url: pkg.document_url || '',
+      document_cloudinary_public_id: pkg.document_cloudinary_public_id || '',
       package_duration: pkg.package_duration || '',
       difficulty: pkg.difficulty || '',
       altitude: pkg.altitude || '',
@@ -290,11 +359,15 @@ export default function PackagesPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, pkg?: Package) => {
     if (!confirm('Are you sure you want to delete this package?')) return;
 
     try {
       setError(null);
+      // Delete PDF from Cloudinary before deleting package for optimal space
+      if (pkg?.document_cloudinary_public_id) {
+        await deleteDocumentFromCloudinary(pkg.document_cloudinary_public_id);
+      }
       const { error } = await supabase
         .from('packages')
         .delete()
@@ -439,7 +512,7 @@ export default function PackagesPage() {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(pkg.id)}
+                      onClick={() => handleDelete(pkg.id, pkg)}
                       style={{ flex: 1, padding: '8px 12px', background: '#fee', border: '1px solid #fcc', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', color: '#dc2626', fontWeight: 500 }}
                     >
                       Delete
@@ -858,6 +931,165 @@ export default function PackagesPage() {
                       images={formData.gallery_images}
                       onImagesChange={(images) => setFormData({ ...formData, gallery_images: images })}
                     />
+                  </div>
+
+                  {/* PDF Document (Brochure/Itinerary) */}
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                      Package PDF Document
+                    </label>
+                    <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px' }}>
+                      Upload a PDF brochure or itinerary (max 50 MB). The document will be stored in Cloudinary and the URL saved in the database.
+                    </p>
+                    <input
+                      ref={pdfInputRef}
+                      type='file'
+                      accept='application/pdf'
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 50 * 1024 * 1024) {
+                            setError('PDF must be less than 50 MB');
+                            return;
+                          }
+                          handleDocumentUpload(file);
+                          e.target.value = '';
+                        }
+                      }}
+                      style={{ display: 'none' }}
+                    />
+                    <button
+                      type='button'
+                      onClick={() => pdfInputRef.current?.click()}
+                      disabled={uploadingDocument}
+                      style={{
+                        padding: '12px 24px',
+                        border: '2px dashed #0d5a6f',
+                        borderRadius: '8px',
+                        cursor: uploadingDocument ? 'not-allowed' : 'pointer',
+                        background: uploadingDocument ? '#f3f4f6' : '#fff',
+                        color: '#0d5a6f',
+                        fontWeight: 600,
+                        fontSize: '14px',
+                        marginBottom: '12px',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
+                      onMouseEnter={(e) => !uploadingDocument && (e.currentTarget.style.background = '#f0f9ff')}
+                      onMouseLeave={(e) => !uploadingDocument && (e.currentTarget.style.background = '#fff')}
+                    >
+                      <FileUp size={18} />
+                      {uploadingDocument ? 'Uploading PDF...' : 'Upload PDF Document'}
+                    </button>
+                    {formData.document_url && (
+                      <div style={{ marginTop: '12px', border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', background: '#f9fafb' }}>
+                        <div style={{ padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', borderBottom: '1px solid #e5e7eb' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <FileText size={16} />
+                            PDF Uploaded Successfully
+                          </span>
+                          <button
+                            type='button'
+                            onClick={() => {
+                              if (!editingPackage && formData.document_cloudinary_public_id) {
+                                deleteDocumentFromCloudinary(formData.document_cloudinary_public_id);
+                              }
+                              setFormData({ ...formData, document_url: '', document_cloudinary_public_id: '' });
+                              setPdfDeliveryBlocked(false);
+                            }}
+                            style={{
+                              padding: '4px 12px',
+                              background: '#fee',
+                              color: '#dc2626',
+                              border: '1px solid #fcc',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                            }}
+                          >
+                            Remove PDF
+                          </button>
+                        </div>
+
+                        {pdfDeliveryBlocked && (
+                          <div style={{
+                            margin: '12px 12px 0',
+                            padding: '12px 16px',
+                            background: '#fef3c7',
+                            border: '1px solid #fbbf24',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            color: '#92400e',
+                            lineHeight: 1.5,
+                          }}>
+                            <strong style={{ display: 'block', marginBottom: '4px' }}>⚠ PDF delivery is blocked by Cloudinary</strong>
+                            The PDF uploaded successfully but cannot be viewed or downloaded publicly. To fix this:
+                            <ol style={{ margin: '8px 0 0', paddingLeft: '20px' }}>
+                              <li>Go to <a href='https://console.cloudinary.com/settings/security' target='_blank' rel='noopener noreferrer' style={{ color: '#0d5a6f', fontWeight: 600 }}>Cloudinary Settings → Security</a></li>
+                              <li>Enable &quot;Allow delivery of PDF and ZIP files&quot;</li>
+                              <li>Save, then re-upload the PDF</li>
+                            </ol>
+                          </div>
+                        )}
+
+                        <div style={{ padding: '12px' }}>
+                          <div style={{
+                            padding: '16px',
+                            background: '#fff',
+                            borderRadius: '8px',
+                            border: '1px solid #e5e7eb',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                              <div style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '8px',
+                                background: '#0d5a6f',
+                                color: '#fff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                              }}>
+                                <FileText size={20} />
+                              </div>
+                              <div style={{ minWidth: 0 }}>
+                                <p style={{ fontSize: '13px', fontWeight: 600, color: '#374151', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {formData.document_cloudinary_public_id || 'PDF Document'}
+                                </p>
+                                <p style={{ fontSize: '12px', color: '#6b7280', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {formData.document_url}
+                                </p>
+                              </div>
+                            </div>
+                            <a
+                              href={formData.document_url}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              style={{
+                                padding: '6px 16px',
+                                background: '#0d5a6f',
+                                color: '#fff',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                fontWeight: 600,
+                                textDecoration: 'none',
+                                whiteSpace: 'nowrap',
+                                flexShrink: 0,
+                              }}
+                            >
+                              Open PDF ↗
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

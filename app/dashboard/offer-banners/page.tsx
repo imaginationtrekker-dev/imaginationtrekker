@@ -8,6 +8,7 @@ interface OfferBanner {
   id: string;
   image_url: string;
   alt_title: string | null;
+  link_url: string | null;
   sort_order: number;
   is_active: boolean;
   created_at?: string;
@@ -25,6 +26,7 @@ export default function OfferBannersPage() {
   const [formData, setFormData] = useState({
     image_url: '',
     alt_title: '',
+    link_url: '',
     sort_order: 0,
     is_active: true,
   });
@@ -127,6 +129,7 @@ export default function OfferBannersPage() {
     setFormData({
       image_url: banner.image_url,
       alt_title: banner.alt_title || '',
+      link_url: banner.link_url || '',
       sort_order: banner.sort_order,
       is_active: banner.is_active,
     });
@@ -155,6 +158,7 @@ export default function OfferBannersPage() {
     setFormData({
       image_url: '',
       alt_title: '',
+      link_url: '',
       sort_order: 0,
       is_active: true,
     });
@@ -210,6 +214,7 @@ export default function OfferBannersPage() {
                 <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '14px', color: '#374151' }}>Image</th>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '14px', color: '#374151' }}>Alt Title</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '14px', color: '#374151' }}>Link</th>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '14px', color: '#374151' }}>Sort Order</th>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '14px', color: '#374151' }}>Status</th>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '14px', color: '#374151' }}>Actions</th>
@@ -234,6 +239,11 @@ export default function OfferBannersPage() {
                       )}
                     </td>
                     <td style={{ padding: '12px 16px', fontSize: '14px', color: '#1f2937' }}>{banner.alt_title || '-'}</td>
+                    <td style={{ padding: '12px 16px', fontSize: '13px', color: '#6b7280', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {banner.link_url ? (
+                        <a href={banner.link_url} target='_blank' rel='noopener noreferrer' style={{ color: '#0d5a6f' }}>{banner.link_url}</a>
+                      ) : '-'}
+                    </td>
                     <td style={{ padding: '12px 16px', fontSize: '14px', color: '#1f2937' }}>{banner.sort_order}</td>
                     <td style={{ padding: '12px 16px' }}>
                       <span style={{
@@ -403,6 +413,20 @@ export default function OfferBannersPage() {
                   placeholder="Enter alt text or title tag"
                   style={{ width: '100%', padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', color: '#1f2937' }}
                 />
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: 500, color: '#374151' }}>
+                  Link URL (optional)
+                </label>
+                <input
+                  type='url'
+                  value={formData.link_url}
+                  onChange={(e) => setFormData({ ...formData, link_url: e.target.value })}
+                  placeholder="https://example.com"
+                  style={{ width: '100%', padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', color: '#1f2937' }}
+                />
+                <p style={{ marginTop: '4px', fontSize: '12px', color: '#6b7280' }}>The banner will link to this URL when clicked</p>
               </div>
 
               <div style={{ marginBottom: '16px' }}>
