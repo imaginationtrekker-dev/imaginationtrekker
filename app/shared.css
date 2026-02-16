@@ -544,7 +544,7 @@
 }
 
 .footer-logo img {
-  width: 80px;
+  width: 140px;
   height: auto;
   filter: brightness(1.05);
 }
@@ -730,7 +730,7 @@
 /* Contact Links */
 .footer-contact-link {
   display: inline-flex;
-  align-items: center;
+  align-items: start;
   gap: 0.5rem;
   color: rgba(255, 255, 255, 0.75);
   font-size: 0.9375rem;
@@ -747,6 +747,7 @@
 .footer-contact-link svg {
   flex-shrink: 0;
   color: #fff;
+  margin-top: 4px;
 }
 
 .footer-address {

@@ -45,7 +45,7 @@ interface PackageData {
   safety_for_trek: string | null;
   faqs: any[] | null;
   booking_dates: string[] | null;
-  why_choose_us: any[] | null;
+  why_choose_us: any[] | string | null;
   price: number | null;
   discounted_price: number | null;
 }
@@ -93,18 +93,66 @@ function parseContentToList(html: string): string[] {
   return cleaned ? [cleaned] : [];
 }
 
+function escapeHtml(input: string) {
+  return input
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function getWhyChooseUsItemHtml(item: any): string {
+  if (!item) return "";
+  if (typeof item === "string") return item;
+
+  const title = item.title || item.heading || item.name || "";
+  const description = item.description || item.desc || item.text || "";
+
+  if (title && description) {
+    const safeDesc = escapeHtml(String(description)).replace(/\n/g, "<br />");
+    return `<strong>${escapeHtml(String(title))}</strong><br />${safeDesc}`;
+  }
+
+  if (title) return `<strong>${escapeHtml(String(title))}</strong>`;
+  if (description)
+    return escapeHtml(String(description)).replace(/\n/g, "<br />");
+
+  return "";
+}
+
+function normalizeWhyChooseUs(input: any): any[] {
+  if (!input) return [];
+  if (Array.isArray(input)) return input;
+
+  if (typeof input === "string") {
+    try {
+      const parsed = JSON.parse(input);
+      if (Array.isArray(parsed)) return parsed;
+      if (parsed && Array.isArray(parsed.items)) return parsed.items;
+    } catch {
+      return [];
+    }
+  }
+
+  if (
+    typeof input === "object" &&
+    input &&
+    Array.isArray((input as any).items)
+  ) {
+    return (input as any).items;
+  }
+
+  return [];
+}
+
 export default function PackageDetails({ packageData }: PackageDetailsProps) {
+  const whyChooseUsItems = normalizeWhyChooseUs(packageData.why_choose_us);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
-  const [expandedItinerary, setExpandedItinerary] = useState<number | null>(
-    packageData.itinerary &&
-      Array.isArray(packageData.itinerary) &&
-      packageData.itinerary.length > 0
-      ? 0
-      : null,
-  );
+  const [expandedItinerary, setExpandedItinerary] = useState<number | null>(null);
   const [activeSection, setActiveSection] = useState<string>("");
   const [navScrollPosition, setNavScrollPosition] = useState(0);
   const [isDatesExpanded, setIsDatesExpanded] = useState(false);
@@ -119,9 +167,13 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
   const [showItineraryMore, setShowItineraryMore] = useState<
     Record<number, boolean>
   >({});
-  const navRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement | null>(null);
+  const galleryRef = useRef<HTMLElement | null>(null);
   const navTrackRef = useRef<HTMLDivElement>(null);
   const navItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [isNavSticky, setIsNavSticky] = useState(false);
+  const isNavStickyRef = useRef(false);
+  const [navHeight, setNavHeight] = useState(56);
   const descriptionRef = useRef<HTMLDivElement>(null);
   const safetyRef = useRef<HTMLDivElement>(null);
   const itineraryDescriptionRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -233,6 +285,12 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
       condition: !!packageData.safety_for_trek,
     },
     {
+      id: "why-choose-us",
+      label: "Why Choose Us",
+      icon: Star,
+      condition: whyChooseUsItems.length > 0,
+    },
+    {
       id: "faqs",
       label: "FAQs",
       icon: HelpCircle,
@@ -243,11 +301,62 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
     },
   ].filter((section) => section.condition);
 
+  // Sticky nav: only stick after scrolling past thumbnail image
+  useEffect(() => {
+    const gallery = galleryRef.current;
+    const nav = navRef.current;
+    if (!gallery || !nav || sections.length === 0) return;
+
+    const STICKY_GAP = 16; // gap below header when sticky
+    let rafId: number | null = null;
+
+    const updateSticky = () => {
+      const headerEl = document.querySelector(".header") as HTMLElement | null;
+      const headerH = headerEl?.offsetHeight ?? 92;
+      const stickyTop = headerH + STICKY_GAP;
+      nav.style.setProperty("--package-section-nav-top", `${stickyTop}px`);
+
+      const galleryRect = gallery.getBoundingClientRect();
+      const galleryBottom = galleryRect.bottom;
+      // Stick when gallery bottom has scrolled past the sticky position
+      const shouldStick = galleryBottom <= stickyTop;
+
+      if (isNavStickyRef.current !== shouldStick) {
+        isNavStickyRef.current = shouldStick;
+        setIsNavSticky(shouldStick);
+      }
+      if (nav.offsetHeight > 0) setNavHeight(nav.offsetHeight);
+    };
+
+    const handleScroll = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updateSticky);
+    };
+
+    const handleResize = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updateSticky);
+    };
+
+    updateSticky();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [sections.length, displayImages.length]);
+
   // Scroll to section
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      const headerOffset = 100;
+      const headerEl = document.querySelector(".header") as HTMLElement | null;
+      const headerH = headerEl?.offsetHeight ?? 0;
+      const navH = navRef.current?.offsetHeight ?? 0;
+      const headerOffset = headerH + navH + 16;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition =
         elementPosition + window.pageYOffset - headerOffset;
@@ -263,7 +372,10 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
   // Detect active section on scroll
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 150;
+      const headerEl = document.querySelector(".header") as HTMLElement | null;
+      const headerH = headerEl?.offsetHeight ?? 0;
+      const navH = navRef.current?.offsetHeight ?? 0;
+      const scrollPosition = window.scrollY + headerH + navH + 24;
 
       for (let i = sections.length - 1; i >= 0; i--) {
         const section = document.getElementById(sections[i].id);
@@ -611,7 +723,7 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
     <>
       {/* Gallery Section with GSAP Slider */}
       {displayImages.length > 0 && (
-        <section className="package-gallery-section">
+        <section className="package-gallery-section" ref={galleryRef}>
           <div className="package-gallery-container">
             <div className="package-slider-wrapper">
               <div className="package-slider-track" ref={sliderRef}>
@@ -708,10 +820,21 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
         </section>
       )}
 
-      {/* Section Navigation Bar - Glassmorphism Fixed Bottom */}
+      {/* Section Navigation Bar - Sticky only after scrolling past thumbnail */}
       {sections.length > 0 && (
-        <nav className="package-section-nav" ref={navRef}>
-          <div className="package-nav-container">
+        <div className="package-section-nav-wrapper">
+          {isNavSticky && (
+            <div
+              className="package-section-nav-spacer"
+              aria-hidden="true"
+              style={{ height: navHeight }}
+            />
+          )}
+          <nav
+            className={`package-section-nav ${isNavSticky ? "is-sticky" : ""}`}
+            ref={navRef}
+          >
+            <div className="package-nav-container">
             <div className="package-nav-track" ref={navTrackRef}>
               {sections.map((section, index) => {
                 const Icon = section.icon;
@@ -732,6 +855,7 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
             </div>
           </div>
         </nav>
+        </div>
       )}
 
       {/* Main Content Section */}
@@ -947,18 +1071,9 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
                               <button
                                 className="package-step-header"
                                 onClick={() => {
-                                  // If clicking the currently open item, only close it if there are other items
                                   if (expandedItinerary === index) {
-                                    // Don't allow closing if it's the only open item
-                                    const itineraryLength =
-                                      packageData.itinerary?.length || 0;
-                                    if (itineraryLength > 1) {
-                                      // Find the next available index to open
-                                      const nextIndex =
-                                        (index + 1) % itineraryLength;
-                                      setExpandedItinerary(nextIndex);
-                                    }
-                                    // If it's the only item, keep it open (do nothing)
+                                    // Close the open item - don't open another
+                                    setExpandedItinerary(null);
                                   } else {
                                     // Open the clicked item
                                     setExpandedItinerary(index);
@@ -1263,6 +1378,49 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
                         </button>
                       </div>
                     )}
+                  </div>
+                </div>
+              )}
+
+              {/* Why Choose Us */}
+              {whyChooseUsItems.length > 0 && (
+                <div id="why-choose-us" className="package-section">
+                  <h2 className="package-section-title">
+                    <Star size={24} className="package-section-title-icon" />
+                    Why Choose Us
+                  </h2>
+                  <div className="package-inclusions">
+                    {whyChooseUsItems
+                      .map((item) => getWhyChooseUsItemHtml(item))
+                      .filter(Boolean)
+                      .map((html, index) => (
+                        <div key={index} className="package-list-item">
+                          <div className="package-list-icon">
+                            <svg
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                clip-rule="evenodd"
+                                d="M21 12C21 12.5523 20.5523 13 20 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H20C20.5523 11 21 11.4477 21 12Z"
+                                fill="currentColor"
+                              ></path>
+                              <path
+                                d="M18.9721 12C18.8788 11.8452 18.6832 11.5671 18.4693 11.3251C18.0436 10.8432 17.4568 10.2928 16.8443 9.76105C16.2368 9.23357 15.6263 8.74365 15.166 8.38437C14.9363 8.20515 14.54 7.90576 14.4068 7.80521C13.9622 7.47768 13.8672 6.85173 14.1947 6.40706C14.5222 5.96236 15.1482 5.86736 15.5929 6.19487L15.5966 6.19767C15.741 6.30672 16.1597 6.62291 16.3964 6.80767C16.8735 7.18002 17.5131 7.69303 18.1555 8.25084C18.793 8.80434 19.4563 9.4216 19.9681 10.0008C20.2229 10.2892 20.4614 10.5918 20.6415 10.8906C20.8051 11.162 20.9999 11.5568 20.9999 12C20.9999 12.4431 20.8051 12.838 20.6415 13.1094C20.4614 13.4082 20.2229 13.7108 19.9681 13.9992C19.4563 14.5784 18.793 15.1957 18.1555 15.7492C17.5131 16.307 16.8735 16.82 16.3964 17.1923C16.1597 17.3771 15.7413 17.6931 15.5969 17.8021L15.5929 17.8051C15.1482 18.1326 14.5222 18.0376 14.1947 17.5929C13.8672 17.1483 13.9622 16.5223 14.4068 16.1948C14.54 16.0942 14.9363 15.7948 15.166 15.6156C15.6263 15.2564 16.2368 14.7664 16.8443 14.2389C17.4568 13.7072 18.0436 13.1568 18.4693 12.6749C18.6832 12.4329 18.8788 12.1548 18.9721 12Z"
+                                fill="currentColor"
+                              ></path>
+                            </svg>
+                          </div>
+                          <div
+                            className="package-list-text"
+                            dangerouslySetInnerHTML={{ __html: html }}
+                          />
+                        </div>
+                      ))}
                   </div>
                 </div>
               )}

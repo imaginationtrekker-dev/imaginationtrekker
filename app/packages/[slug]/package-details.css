@@ -1,20 +1,44 @@
 /* Package Details Page Styles */
 
-/* Section Navigation Bar - Glassmorphism Fixed Bottom */
+/* Section Navigation Bar - Sticky only after scrolled past thumbnail */
+.package-section-nav-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.package-section-nav-spacer {
+  width: 100%;
+  pointer-events: none;
+}
+
 .package-section-nav {
+  position: relative;
+  left: 0;
+  right: 0;
+  z-index: 120;
+  width: 100%;
+  padding: 0.75rem 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: box-shadow 0.2s ease;
+}
+
+/* Sticky state: fixed with gap below header */
+.package-section-nav.is-sticky {
   position: fixed;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
-  width: auto;
-  max-width: calc(100% - 2rem);
-  padding: 0;
+  top: var(--package-section-nav-top, 108px); /* header height + gap */
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .package-nav-container {
   width: 100%;
-  padding: 0;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: center;
 }
 
 .package-nav-track {
@@ -88,10 +112,11 @@
 /* Mobile - Slider with GSAP */
 @media (max-width: 768px) {
   .package-section-nav {
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: calc(100% - 1rem);
+    padding: 0.6rem 0;
+  }
+
+  .package-section-nav.is-sticky {
+    top: var(--package-section-nav-top, 94px);
   }
 
   .package-nav-track {
@@ -2051,7 +2076,7 @@
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 1rem;
-  padding: 2rem;
+  padding: 20px 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }

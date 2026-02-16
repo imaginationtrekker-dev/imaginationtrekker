@@ -4,11 +4,26 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 
-export function Sidebar() {
+interface SidebarProps {
+  isMobileOpen: boolean;
+  isDesktopCollapsed: boolean;
+  onNavigate?: () => void;
+}
+
+export function Sidebar({ isMobileOpen, isDesktopCollapsed, onNavigate }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <div className='sidebar'>
+    <div
+      className={`sidebar ${isMobileOpen ? 'sidebar--mobile-open' : ''} ${isDesktopCollapsed ? 'sidebar--desktop-collapsed' : ''}`}
+      onClick={(e) => {
+        // Close drawer when a nav link is clicked.
+        const target = e.target as HTMLElement | null;
+        if (!target) return;
+        const anchor = target.closest('a');
+        if (anchor) onNavigate?.();
+      }}
+    >
       <div className='logo'>
         <Image
           src='/images/logo-old.png'

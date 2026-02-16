@@ -50,6 +50,8 @@ export default function AboutPage() {
   const [recognitionGallery, setRecognitionGallery] = useState<GalleryImage[]>([]);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [storyExpanded, setStoryExpanded] = useState(false);
+  const [missionExpanded, setMissionExpanded] = useState(false);
+  const [visionExpanded, setVisionExpanded] = useState(false);
   const [appreciationExpanded, setAppreciationExpanded] = useState(false);
   const [recognitionExpanded, setRecognitionExpanded] = useState(false);
 
@@ -193,20 +195,32 @@ export default function AboutPage() {
                   <div className="mission-vision-item">
                     <h2 className="mission-vision-title">Our Mission</h2>
                     <div className="mission-vision-separator"></div>
-                    <div 
-                      className="mission-vision-content"
+                    <div className={`mission-vision-content ${missionExpanded ? 'expanded' : 'collapsed'}`}
                       dangerouslySetInnerHTML={{ __html: aboutPage.our_mission.replace(/\n/g, '<br />') }}
                     />
+                    <button
+                      type="button"
+                      className="mission-vision-toggle-btn"
+                      onClick={() => setMissionExpanded(!missionExpanded)}
+                    >
+                      {missionExpanded ? 'Show less' : 'Show more'}
+                    </button>
                   </div>
                 )}
                 {aboutPage.our_vision && (
                   <div className="mission-vision-item">
                     <h2 className="mission-vision-title">Our Vision</h2>
                     <div className="mission-vision-separator"></div>
-                    <div 
-                      className="mission-vision-content"
+                    <div className={`mission-vision-content ${visionExpanded ? 'expanded' : 'collapsed'}`}
                       dangerouslySetInnerHTML={{ __html: aboutPage.our_vision.replace(/\n/g, '<br />') }}
                     />
+                    <button
+                      type="button"
+                      className="mission-vision-toggle-btn"
+                      onClick={() => setVisionExpanded(!visionExpanded)}
+                    >
+                      {visionExpanded ? 'Show less' : 'Show more'}
+                    </button>
                   </div>
                 )}
               </div>
@@ -346,24 +360,24 @@ export default function AboutPage() {
               <div className="team-cards-grid">
                 {aboutPage.team_members.map((member, index) => (
                   <div key={index} className="team-card">
-                    <div className="team-card-photo">
-                      {member.image_url ? (
-                        <Image
-                          src={member.image_url}
-                          alt={member.name}
-                          fill
-                          className="team-image"
-                          sizes="(max-width: 768px) 100vw, 280px"
-                        />
-                      ) : (
-                        <div className="team-image-placeholder">
-                          <span className="team-initials">
-                            {member.name ? member.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?'}
-                          </span>
-                        </div>
-                      )}
-                    </div>
                     <div className="team-card-details">
+                      <div className="team-avatar">
+                        {member.image_url ? (
+                          <Image
+                            src={member.image_url}
+                            alt={member.name}
+                            fill
+                            className="team-avatar-image"
+                            sizes="120px"
+                          />
+                        ) : (
+                          <div className="team-avatar-placeholder">
+                            <span className="team-initials">
+                              {member.name ? member.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                       <h3 className="team-name">{member.name}</h3>
                       {member.position && (
                         <p className="team-position">{member.position}</p>

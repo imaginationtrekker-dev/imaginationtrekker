@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase-browser";
-import { Search, MessageCircle, Calendar, Trash2, RefreshCw } from "lucide-react";
+import {
+  Search,
+  MessageCircle,
+  Calendar,
+  Trash2,
+  RefreshCw,
+} from "lucide-react";
 import "../dashboard.css";
 
 interface ModalEnquiry {
@@ -116,7 +122,7 @@ export default function ModalEnquiriesPage() {
   };
 
   return (
-    <div className="dashboard_page" style={{ margin: "24px" }}>
+    <div className="dashboard_page enquiries-page" style={{ margin: "24px" }}>
       {/* Header */}
       <div className="heading_block">
         <div
@@ -148,25 +154,22 @@ export default function ModalEnquiriesPage() {
               opacity: loading ? 0.7 : 1,
             }}
           >
-            <RefreshCw size={18} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />
+            <RefreshCw
+              size={18}
+              style={{
+                animation: loading ? "spin 1s linear infinite" : "none",
+              }}
+            />
             Refresh
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div style={{ padding: "24px" }}>
+      <div className="enquiries-content-wrap">
         {/* Filters */}
-        <div
-          style={{
-            display: "flex",
-            gap: "1rem",
-            marginBottom: "2rem",
-            flexWrap: "wrap",
-            alignItems: "center",
-          }}
-        >
-          <div style={{ flex: 1, minWidth: "300px", position: "relative" }}>
+        <div className="enquiries-filters">
+          <div className="enquiries-search-wrap">
             <Search
               size={20}
               style={{
@@ -179,7 +182,7 @@ export default function ModalEnquiriesPage() {
             />
             <input
               type="text"
-              placeholder="Search by name, WhatsApp, or message..."
+              placeholder="Search by name, WhatsApp..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => {
@@ -195,6 +198,7 @@ export default function ModalEnquiriesPage() {
                 fontSize: "1rem",
                 fontFamily: "var(--font-jakarta)",
                 color: "#1f2937",
+                boxSizing: "border-box",
               }}
             />
           </div>
@@ -276,53 +280,166 @@ export default function ModalEnquiriesPage() {
               fontFamily: "var(--font-jakarta)",
             }}
           >
-            {searchQuery ? "No enquiries found matching your search." : "No enquiries yet."}
+            {searchQuery
+              ? "No enquiries found matching your search."
+              : "No enquiries yet."}
           </div>
         )}
 
         {!loading && enquiries.length > 0 && (
           <>
-            <div style={{ padding: "0 24px 24px 24px" }}>
-              <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "8px", overflow: "hidden", boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}>
-                  <thead>
-                    <tr style={{ background: "#f9fafb", borderBottom: "2px solid #e5e7eb" }}>
-                      <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, fontSize: "14px", color: "#374151" }}>Full Name</th>
-                      <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, fontSize: "14px", color: "#374151" }}>WhatsApp</th>
-                      <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, fontSize: "14px", color: "#374151" }}>Message</th>
-                      <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, fontSize: "14px", color: "#374151" }}>Date</th>
-                      <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, fontSize: "14px", color: "#374151" }}>Actions</th>
+            <div style={{ padding: "0", overflowX: "auto", minWidth: 0 }}>
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  background: "#fff",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                <thead>
+                  <tr
+                    style={{
+                      background: "#f9fafb",
+                      borderBottom: "2px solid #e5e7eb",
+                    }}
+                  >
+                    <th
+                      style={{
+                        padding: "12px 16px",
+                        textAlign: "left",
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        color: "#374151",
+                      }}
+                    >
+                      Full Name
+                    </th>
+                    <th
+                      style={{
+                        padding: "12px 16px",
+                        textAlign: "left",
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        color: "#374151",
+                      }}
+                    >
+                      WhatsApp
+                    </th>
+                    <th
+                      style={{
+                        padding: "12px 16px",
+                        textAlign: "left",
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        color: "#374151",
+                      }}
+                    >
+                      Message
+                    </th>
+                    <th
+                      style={{
+                        padding: "12px 16px",
+                        textAlign: "left",
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        color: "#374151",
+                      }}
+                    >
+                      Date
+                    </th>
+                    <th
+                      style={{
+                        padding: "12px 16px",
+                        textAlign: "left",
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        color: "#374151",
+                      }}
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {enquiries.map((enquiry) => (
+                    <tr
+                      key={enquiry.id}
+                      style={{ borderBottom: "1px solid #e5e7eb" }}
+                    >
+                      <td
+                        style={{
+                          padding: "12px 16px",
+                          fontSize: "14px",
+                          color: "#1f2937",
+                          fontWeight: 500,
+                        }}
+                      >
+                        {enquiry.full_name}
+                      </td>
+                      <td
+                        style={{
+                          padding: "12px 16px",
+                          fontSize: "14px",
+                          color: "#1f2937",
+                        }}
+                      >
+                        {enquiry.whatsapp}
+                      </td>
+                      <td
+                        style={{
+                          padding: "12px 16px",
+                          fontSize: "14px",
+                          color: "#1f2937",
+                          maxWidth: "400px",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {enquiry.message}
+                      </td>
+                      <td
+                        style={{
+                          padding: "12px 16px",
+                          fontSize: "14px",
+                          color: "#6b7280",
+                        }}
+                      >
+                        {formatDate(enquiry.created_at)}
+                      </td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <button
+                          onClick={() => handleDelete(enquiry.id)}
+                          disabled={deletingId === enquiry.id}
+                          style={{
+                            padding: "6px 12px",
+                            background:
+                              deletingId === enquiry.id ? "#f3f4f6" : "#fee2e2",
+                            border:
+                              deletingId === enquiry.id
+                                ? "1px solid #d1d5db"
+                                : "1px solid #fcc",
+                            borderRadius: "4px",
+                            cursor:
+                              deletingId === enquiry.id
+                                ? "not-allowed"
+                                : "pointer",
+                            fontSize: "12px",
+                            color:
+                              deletingId === enquiry.id ? "#9ca3af" : "#dc2626",
+                            fontWeight: 500,
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {enquiries.map((enquiry) => (
-                      <tr key={enquiry.id} style={{ borderBottom: "1px solid #e5e7eb" }}>
-                        <td style={{ padding: "12px 16px", fontSize: "14px", color: "#1f2937", fontWeight: 500 }}>
-                          {enquiry.full_name}
-                        </td>
-                        <td style={{ padding: "12px 16px", fontSize: "14px", color: "#1f2937" }}>
-                          {enquiry.whatsapp}
-                        </td>
-                        <td style={{ padding: "12px 16px", fontSize: "14px", color: "#1f2937", maxWidth: "400px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {enquiry.message}
-                        </td>
-                        <td style={{ padding: "12px 16px", fontSize: "14px", color: "#6b7280" }}>
-                          {formatDate(enquiry.created_at)}
-                        </td>
-                        <td style={{ padding: "12px 16px" }}>
-                          <button
-                            onClick={() => handleDelete(enquiry.id)}
-                            disabled={deletingId === enquiry.id}
-                            style={{ padding: "6px 12px", background: deletingId === enquiry.id ? "#f3f4f6" : "#fee2e2", border: deletingId === enquiry.id ? "1px solid #d1d5db" : "1px solid #fcc", borderRadius: "4px", cursor: deletingId === enquiry.id ? "not-allowed" : "pointer", fontSize: "12px", color: deletingId === enquiry.id ? "#9ca3af" : "#dc2626", fontWeight: 500 }}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
 
             {/* Pagination */}
@@ -342,11 +459,15 @@ export default function ModalEnquiriesPage() {
                   disabled={!pagination.hasPreviousPage || loading}
                   style={{
                     padding: "0.75rem 1.5rem",
-                    background: pagination.hasPreviousPage ? "#0d5a6f" : "#e5e7eb",
+                    background: pagination.hasPreviousPage
+                      ? "#0d5a6f"
+                      : "#e5e7eb",
                     color: pagination.hasPreviousPage ? "#fff" : "#9ca3af",
                     border: "none",
                     borderRadius: "0.5rem",
-                    cursor: pagination.hasPreviousPage ? "pointer" : "not-allowed",
+                    cursor: pagination.hasPreviousPage
+                      ? "pointer"
+                      : "not-allowed",
                     fontFamily: "var(--font-jakarta)",
                     fontWeight: 600,
                   }}
@@ -360,7 +481,8 @@ export default function ModalEnquiriesPage() {
                     fontWeight: 500,
                   }}
                 >
-                  Page {pagination.page} of {pagination.totalPages} ({pagination.total} total)
+                  Page {pagination.page} of {pagination.totalPages} (
+                  {pagination.total} total)
                 </span>
                 <button
                   onClick={() => setCurrentPage((p) => p + 1)}

@@ -1,11 +1,16 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { LogOut, MoreVertical } from 'lucide-react';
+import { LogOut, Menu, MoreVertical, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 
-export function Header() {
+interface HeaderProps {
+  onToggleSidebar: () => void;
+  isMobileSidebarOpen: boolean;
+  isDesktopSidebarCollapsed: boolean;
+}
+
+export function Header({ onToggleSidebar, isMobileSidebarOpen, isDesktopSidebarCollapsed }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [showMenu, setShowMenu] = useState(false);
@@ -68,6 +73,15 @@ export function Header() {
   return (
     <div className='header'>
       <div className='header_left'>
+        <button
+          type='button'
+          className='header_menu_btn'
+          aria-label='Toggle sidebar'
+          aria-pressed={isMobileSidebarOpen ? true : !isDesktopSidebarCollapsed}
+          onClick={onToggleSidebar}
+        >
+          {isMobileSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
         <div className='header_breadcrumbs'>
           {breadcrumbs.map((crumb, index) => (
             <span key={crumb.path}>
@@ -90,7 +104,7 @@ export function Header() {
         <div className='header_actions'>
           <button onClick={handleLogout} className='btn btn_primary'>
             <LogOut size={16} />
-            Logout
+            <span className='btn_text'>Logout</span>
           </button>
         </div>
         <button

@@ -53,7 +53,7 @@ export default function Footer() {
           <div className="footer-brand">
             <Link href="/" className="footer-logo">
               <Image
-                src="/images/logo-old.png"
+                src="/images/footer-logo.png"
                 alt="Imagination Trekker"
                 width={160}
                 height={64}
@@ -179,9 +179,9 @@ export default function Footer() {
                   <Mail size={16} />
                   imaginationtrekker@gmail.com
                 </a>
-                <a href="tel:+917817849247" className="footer-contact-link">
+                <a className="footer-contact-link">
                   <Phone size={16} />
-                  +91 78178 49247
+                  +91 78178 49247 / +91 70607 54265
                 </a>
                 <div className="footer-address">
                   <MapPin size={16} />

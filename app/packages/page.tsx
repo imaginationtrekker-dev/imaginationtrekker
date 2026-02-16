@@ -188,7 +188,7 @@ function PriceRangeSlider({
 }) {
   const [localMin, setLocalMin] = useState(minPrice);
   const [localMax, setLocalMax] = useState(maxPrice);
-  const maxRange = 100000;
+  const maxRange = 500000;
 
   useEffect(() => {
     setLocalMin(minPrice);
@@ -317,7 +317,7 @@ export default function PackagesPage() {
         ...(activeSearchQuery && { searchQuery: activeSearchQuery }),
         sortBy,
         ...(minPrice > 0 && { minPrice: minPrice.toString() }),
-        ...(maxPrice < 100000 && { maxPrice: maxPrice.toString() }),
+        ...(maxPrice < 500000 && { maxPrice: maxPrice.toString() }),
         ...(duration && { duration: duration }),
         ...(difficulty && { difficulty }),
       });
@@ -344,19 +344,10 @@ export default function PackagesPage() {
     difficulty,
   ]);
 
-  // Initial load
+  // Initial load and refetch when filters or page change
   useEffect(() => {
     fetchPackages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Update API when page changes (for pagination)
-  useEffect(() => {
-    if (currentPage > 1) {
-      fetchPackages();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage]);
+  }, [fetchPackages]);
 
   // Handle search button click - applies all filters
   const handleSearch = () => {
@@ -376,7 +367,7 @@ export default function PackagesPage() {
     setSearchQuery("");
     setActiveSearchQuery("");
     setSortBy("date-desc");
-    setPriceRange(0, 100000);
+    setPriceRange(0, 500000);
     setStoreSearchQuery("");
     setDuration("");
     setDifficulty("");

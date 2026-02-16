@@ -116,8 +116,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Apply pagination
-    query = query.range(offset, offset + pageSize - 1);
+    // Apply pagination using limit/offset (more explicit than range)
+    query = query.limit(pageSize).offset(offset);
 
     // Execute query
     const { data, error, count } = await query;

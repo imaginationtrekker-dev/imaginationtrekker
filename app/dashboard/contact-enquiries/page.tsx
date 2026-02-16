@@ -118,7 +118,7 @@ export default function ContactEnquiriesPage() {
   };
 
   return (
-    <div className="dashboard_page" style={{ margin: "24px" }}>
+    <div className="dashboard_page enquiries-page" style={{ margin: "24px" }}>
       {/* Header */}
       <div className="heading_block">
         <div
@@ -157,18 +157,10 @@ export default function ContactEnquiriesPage() {
       </div>
 
       {/* Content */}
-      <div style={{ padding: "24px" }}>
+      <div className="enquiries-content-wrap">
         {/* Filters */}
-      <div
-        style={{
-          display: "flex",
-          gap: "1rem",
-          marginBottom: "2rem",
-          flexWrap: "wrap",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ flex: 1, minWidth: "300px", position: "relative" }}>
+      <div className="enquiries-filters">
+        <div className="enquiries-search-wrap">
           <Search
             size={20}
             style={{
@@ -181,7 +173,7 @@ export default function ContactEnquiriesPage() {
           />
           <input
             type="text"
-            placeholder="Search by name, email, phone, or message..."
+            placeholder="Search by name, email, phone..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={(e) => {
@@ -190,13 +182,13 @@ export default function ContactEnquiriesPage() {
               }
             }}
             style={{
-              width: "100%",
               padding: "0.75rem 1rem 0.75rem 3rem",
               border: "1.5px solid #e5e7eb",
               borderRadius: "0.75rem",
               fontSize: "1rem",
               fontFamily: "var(--font-jakarta)",
               color: "#1f2937",
+              boxSizing: "border-box",
             }}
           />
         </div>
@@ -284,46 +276,13 @@ export default function ContactEnquiriesPage() {
 
       {!loading && enquiries.length > 0 && (
         <>
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem", textAlign: "left" }}>
+          <div className="enquiries-list">
             {enquiries.map((enquiry) => (
-              <div
-                key={enquiry.id}
-                style={{
-                  background: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "1rem",
-                  padding: "1.5rem",
-                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <h3
-                      style={{
-                        fontSize: "1.25rem",
-                        fontWeight: 600,
-                        color: "#1f2937",
-                        margin: "0 0 0.5rem 0",
-                        fontFamily: "var(--font-fraunces), 'Fraunces', serif",
-                      }}
-                    >
-                      {enquiry.full_name}
-                    </h3>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: "1rem",
-                        marginBottom: "1rem",
-                      }}
-                    >
+              <div key={enquiry.id} className="enquiries-card">
+                <div className="enquiries-card-inner">
+                  <div className="enquiries-card-content">
+                    <h3>{enquiry.full_name}</h3>
+                    <div className="enquiries-card-meta">
                       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                         <Mail size={16} color="#6b7280" />
                         <a
@@ -382,6 +341,7 @@ export default function ContactEnquiriesPage() {
                           lineHeight: 1.6,
                           fontFamily: "var(--font-jakarta)",
                           whiteSpace: "pre-wrap",
+                          wordBreak: "break-word",
                         }}
                       >
                         {enquiry.message}
@@ -389,20 +349,10 @@ export default function ContactEnquiriesPage() {
                     </div>
                   </div>
                   <button
+                    type="button"
                     onClick={() => handleDelete(enquiry.id)}
                     disabled={deletingId === enquiry.id}
-                    style={{
-                      padding: "0.5rem",
-                      background: deletingId === enquiry.id ? "#f3f4f6" : "#fee2e2",
-                      color: deletingId === enquiry.id ? "#9ca3af" : "#dc2626",
-                      border: "none",
-                      borderRadius: "0.5rem",
-                      cursor: deletingId === enquiry.id ? "not-allowed" : "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      transition: "all 0.2s",
-                    }}
+                    className="enquiries-card-delete"
                     title="Delete enquiry"
                   >
                     <Trash2 size={18} />

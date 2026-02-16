@@ -31,8 +31,20 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'date-desc'; // title-asc, title-desc, date-asc, date-desc
     const minPrice = searchParams.get('minPrice') ? parseFloat(searchParams.get('minPrice')!) : null;
     const maxPrice = searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : null;
-    const minDuration = searchParams.get('minDuration') ? parseInt(searchParams.get('minDuration')!, 10) : null;
-    const maxDuration = searchParams.get('maxDuration') ? parseInt(searchParams.get('maxDuration')!, 10) : null;
+    // Support both minDuration/maxDuration and duration range (e.g. "4-7")
+    let minDuration = searchParams.get('minDuration') ? parseInt(searchParams.get('minDuration')!, 10) : null;
+    let maxDuration = searchParams.get('maxDuration') ? parseInt(searchParams.get('maxDuration')!, 10) : null;
+    const durationRange = searchParams.get('duration') || '';
+    if (durationRange && minDuration === null && maxDuration === null) {
+      const match = durationRange.match(/^(\d+)-(\d+)$/);
+      if (match) {
+        minDuration = parseInt(match[1], 10);
+        maxDuration = parseInt(match[2], 10);
+      } else if (durationRange === '30+') {
+        minDuration = 30;
+        maxDuration = null;
+      }
+    }
     const difficulty = searchParams.get('difficulty') || '';
 
     // Create a public Supabase client for anonymous access (no auth required)
@@ -48,18 +60,7 @@ export async function GET(request: NextRequest) {
       query = query.or(`package_name.ilike.%${searchQuery}%,package_description.ilike.%${searchQuery}%`);
     }
 
-    // Apply price range filter
-    if (minPrice !== null) {
-      query = query.gte('price', minPrice);
-    }
-    if (maxPrice !== null) {
-      query = query.lte('price', maxPrice);
-    }
-    // Also check discounted_price
-    if (minPrice !== null || maxPrice !== null) {
-      // This is a bit complex - we need to check both price and discounted_price
-      // For now, we'll filter by price and handle discounted_price in the response
-    }
+    // Price range is applied in JS below (to include packages with null price)
 
     // Apply difficulty filter
     if (difficulty) {
@@ -83,7 +84,8 @@ export async function GET(request: NextRequest) {
         break;
     }
 
-    // Don't apply pagination yet - we need to filter first
+    // Explicit limit to ensure we get all packages (PostgREST default can vary)
+    query = query.limit(1000);
     const { data, error, count } = await query;
 
     if (error) {
@@ -124,21 +126,22 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Filter by duration range
+    // Filter by duration range (include packages with duration 0 / unknown)
     if (minDuration !== null || maxDuration !== null) {
       filteredData = filteredData.filter((pkg: any) => {
         const duration = pkg.calculated_duration;
+        if (duration === 0) return true; /* show packages with unknown duration */
         if (minDuration !== null && duration < minDuration) return false;
         if (maxDuration !== null && duration > maxDuration) return false;
         return true;
       });
     }
 
-    // Also filter by discounted_price for price range
+    // Also filter by discounted_price for price range (include packages with null price - "Contact Us")
     if (minPrice !== null || maxPrice !== null) {
       filteredData = filteredData.filter((pkg: any) => {
-        const price = pkg.discounted_price || pkg.price;
-        if (!price) return false;
+        const price = pkg.discounted_price ?? pkg.price;
+        if (price == null) return true; // Show packages with no price
         if (minPrice !== null && price < minPrice) return false;
         if (maxPrice !== null && price > maxPrice) return false;
         return true;

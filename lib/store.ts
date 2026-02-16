@@ -11,7 +11,7 @@ interface SearchFilters {
 }
 
 const defaultMinPrice = 0;
-const defaultMaxPrice = 100000;
+const defaultMaxPrice = 500000; /* high enough to include all packages by default */
 
 export const useSearchFilters = create<SearchFilters>()(
   persist(
@@ -21,14 +21,16 @@ export const useSearchFilters = create<SearchFilters>()(
       maxPrice: defaultMaxPrice,
       setSearchQuery: (query: string) => set({ searchQuery: query }),
       setPriceRange: (min: number, max: number) => set({ minPrice: min, maxPrice: max }),
-      resetFilters: () => set({ 
-        searchQuery: '', 
-        minPrice: defaultMinPrice, 
-        maxPrice: defaultMaxPrice 
+      resetFilters: () => set({
+        searchQuery: '',
+        minPrice: defaultMinPrice,
+        maxPrice: defaultMaxPrice,
       }),
     }),
     {
       name: 'search-filters-storage',
+      partialize: (state) => ({ searchQuery: state.searchQuery }),
+      /* Don't persist minPrice/maxPrice - always start with defaults so all packages show */
     }
   )
 );

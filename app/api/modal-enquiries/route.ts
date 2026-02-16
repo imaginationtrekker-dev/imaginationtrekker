@@ -89,8 +89,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get total count and data
-    const { data, error, count } = await query.range(offset, offset + pageSize - 1);
+    // Get total count and data using limit/offset (more explicit than range)
+    const { data, error, count } = await query.limit(pageSize).offset(offset);
 
     if (error) {
       console.error("Error fetching modal enquiries:", error);
