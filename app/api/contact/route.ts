@@ -116,8 +116,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Apply pagination using limit/offset (more explicit than range)
-    query = query.limit(pageSize).offset(offset);
+    // Apply pagination using range (Supabase PostgREST API)
+    query = query.range(offset, offset + pageSize - 1);
 
     // Execute query
     const { data, error, count } = await query;
