@@ -5,8 +5,8 @@ import { createPortal } from 'react-dom';
 import { createClient } from '@/lib/supabase-browser';
 import Image from 'next/image';
 import { GalleryUploader } from '@/app/components/GalleryUploader';
-import { DatePicker } from '@/app/components/DatePicker';
 import { RichTextEditor } from '@/app/components/RichTextEditor';
+import { stripPFromListItems } from '@/lib/utils';
 import { FileText, FileUp, Images, PenTool, Settings } from 'lucide-react';
 
 interface Package {
@@ -32,8 +32,13 @@ interface Package {
   cancellation_policy?: string;
   refund_policy?: string;
   safety_for_trek?: string;
+  our_food_during_trek?: string;
+  fitness_preparation_guide?: string;
+  things_to_carry?: string;
+  moments_of_trek?: string[];
   faqs: Array<{ question: string; answer: string }>;
   booking_dates: string[];
+  booking_dates_items?: Array<{ heading: string; description: string }>;
   why_choose_us: Array<{ heading: string; description: string }>;
   price?: number;
   discounted_price?: number;
@@ -86,8 +91,13 @@ export default function PackagesPage() {
     cancellation_policy: '',
     refund_policy: '',
     safety_for_trek: '',
+    our_food_during_trek: '',
+    fitness_preparation_guide: '',
+    things_to_carry: '',
+    moments_of_trek: [] as string[],
     faqs: [] as FAQItem[],
     booking_dates: [] as Date[],
+    booking_dates_items: [] as ArrayItem[],
     why_choose_us: [] as ArrayItem[],
     price: undefined as number | undefined,
     discounted_price: undefined as number | undefined,
@@ -256,10 +266,21 @@ export default function PackagesPage() {
         ...formData,
         slug: slug || formData.slug,
         booking_dates: bookingDatesStrings,
+        booking_dates_items: formData.booking_dates_items?.length ? formData.booking_dates_items : null,
         price: formData.price || null,
         discounted_price: formData.discounted_price || null,
         document_url: formData.document_url || null,
         document_cloudinary_public_id: formData.document_cloudinary_public_id || null,
+        package_description: stripPFromListItems(formData.package_description) || null,
+        inclusions: stripPFromListItems(formData.inclusions) || null,
+        exclusions: stripPFromListItems(formData.exclusions) || null,
+        how_to_reach: stripPFromListItems(formData.how_to_reach) || null,
+        safety_for_trek: stripPFromListItems(formData.safety_for_trek) || null,
+        cancellation_policy: stripPFromListItems(formData.cancellation_policy) || null,
+        refund_policy: stripPFromListItems(formData.refund_policy) || null,
+        our_food_during_trek: stripPFromListItems(formData.our_food_during_trek) || null,
+        fitness_preparation_guide: stripPFromListItems(formData.fitness_preparation_guide) || null,
+        things_to_carry: stripPFromListItems(formData.things_to_carry) || null,
       };
 
       if (editingPackage) {
@@ -311,13 +332,18 @@ export default function PackagesPage() {
       base_camp: '',
       itinerary: [],
       inclusions: '',
-      exclusions: '',
-      how_to_reach: '',
-      cancellation_policy: '',
-      refund_policy: '',
-      safety_for_trek: '',
-      faqs: [],
+    exclusions: '',
+    how_to_reach: '',
+    cancellation_policy: '',
+    refund_policy: '',
+    safety_for_trek: '',
+    our_food_during_trek: '',
+    fitness_preparation_guide: '',
+    things_to_carry: '',
+    moments_of_trek: [],
+    faqs: [],
       booking_dates: [],
+      booking_dates_items: [],
       why_choose_us: [],
       price: undefined,
       discounted_price: undefined,
@@ -349,8 +375,13 @@ export default function PackagesPage() {
       cancellation_policy: pkg.cancellation_policy || '',
       refund_policy: pkg.refund_policy || '',
       safety_for_trek: pkg.safety_for_trek || '',
+      our_food_during_trek: pkg.our_food_during_trek || '',
+      fitness_preparation_guide: pkg.fitness_preparation_guide || '',
+      things_to_carry: pkg.things_to_carry || '',
+      moments_of_trek: pkg.moments_of_trek || [],
       faqs: pkg.faqs || [],
-      booking_dates: pkg.booking_dates.map((d: any) => typeof d === 'string' ? new Date(d) : d) || [],
+      booking_dates: pkg.booking_dates?.map((d: any) => typeof d === 'string' ? new Date(d) : d) || [],
+      booking_dates_items: pkg.booking_dates_items || [],
       why_choose_us: pkg.why_choose_us || [],
       price: pkg.price || undefined,
       discounted_price: pkg.discounted_price || undefined,
@@ -381,24 +412,27 @@ export default function PackagesPage() {
     }
   };
 
-  const addArrayItem = (type: 'itinerary' | 'why_choose_us') => {
+  const addArrayItem = (type: 'itinerary' | 'why_choose_us' | 'booking_dates_items') => {
     setFormData(prev => ({
       ...prev,
-      [type]: [...prev[type], { heading: '', description: '' }],
+      [type]: [...(prev[type] || []), { heading: '', description: '' }],
     }));
   };
 
-  const updateArrayItem = (type: 'itinerary' | 'why_choose_us', index: number, field: 'heading' | 'description', value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [type]: prev[type].map((item, i) => i === index ? { ...item, [field]: value } : item),
-    }));
+  const updateArrayItem = (type: 'itinerary' | 'why_choose_us' | 'booking_dates_items', index: number, field: 'heading' | 'description', value: string) => {
+    setFormData(prev => {
+      const arr = prev[type] || [];
+      return {
+        ...prev,
+        [type]: arr.map((item, i) => i === index ? { ...item, [field]: value } : item),
+      };
+    });
   };
 
-  const removeArrayItem = (type: 'itinerary' | 'why_choose_us', index: number) => {
+  const removeArrayItem = (type: 'itinerary' | 'why_choose_us' | 'booking_dates_items', index: number) => {
     setFormData(prev => ({
       ...prev,
-      [type]: prev[type].filter((_, i) => i !== index),
+      [type]: (prev[type] || []).filter((_: unknown, i: number) => i !== index),
     }));
   };
 
@@ -933,6 +967,20 @@ export default function PackagesPage() {
                     />
                   </div>
 
+                  {/* Moments of Trek - Gallery */}
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                      Moments of Trek (Photos)
+                    </label>
+                    <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px' }}>
+                      Upload photos showcasing moments from the trek.
+                    </p>
+                    <GalleryUploader
+                      images={formData.moments_of_trek}
+                      onImagesChange={(images) => setFormData({ ...formData, moments_of_trek: images })}
+                    />
+                  </div>
+
                   {/* PDF Document (Brochure/Itinerary) */}
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#374151' }}>
@@ -1136,6 +1184,30 @@ export default function PackagesPage() {
                     />
                   </div>
 
+                  {/* Our Food During Trek */}
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                      Our Food During Trek
+                    </label>
+                    <RichTextEditor
+                      value={formData.our_food_during_trek}
+                      onChange={(value) => setFormData({ ...formData, our_food_during_trek: value })}
+                      placeholder="Enter food information (bullets, paragraphs, headings)..."
+                    />
+                  </div>
+
+                  {/* Fitness Preparation Guide */}
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                      Fitness Preparation Guide
+                    </label>
+                    <RichTextEditor
+                      value={formData.fitness_preparation_guide}
+                      onChange={(value) => setFormData({ ...formData, fitness_preparation_guide: value })}
+                      placeholder="Enter fitness preparation guide (bullets, paragraphs, headings)..."
+                    />
+                  </div>
+
                   {/* How to Reach */}
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#374151' }}>
@@ -1159,6 +1231,18 @@ export default function PackagesPage() {
                       value={formData.safety_for_trek}
                       onChange={(value) => setFormData({ ...formData, safety_for_trek: value })}
                       placeholder="Enter safety information for the trek..."
+                    />
+                  </div>
+
+                  {/* Things to Carry */}
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                      Things to Carry
+                    </label>
+                    <RichTextEditor
+                      value={formData.things_to_carry}
+                      onChange={(value) => setFormData({ ...formData, things_to_carry: value })}
+                      placeholder="Enter things to carry (bullets, paragraphs, headings)..."
                     />
                   </div>
 
@@ -1279,13 +1363,47 @@ export default function PackagesPage() {
 
                   {/* Booking Dates */}
                   <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#374151' }}>
-                      Booking Dates
-                    </label>
-                    <DatePicker
-                      selectedDates={formData.booking_dates}
-                      onChange={(dates) => setFormData({ ...formData, booking_dates: dates })}
-                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <label style={{ fontSize: '16px', fontWeight: 600, color: '#374151' }}>Booking Dates</label>
+                      <button
+                        type='button'
+                        onClick={() => addArrayItem('booking_dates_items')}
+                        style={{ padding: '8px 16px', background: '#0d5a6f', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}
+                      >
+                        + Add Item
+                      </button>
+                    </div>
+                    <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px' }}>
+                      Add date ranges. Each item has a header (e.g. March 15–20) and optional description below.
+                    </p>
+                    {(formData.booking_dates_items || []).map((item, index) => (
+                      <div key={index} style={{ marginBottom: '16px', padding: '16px', border: '1px solid #e5e7eb', borderRadius: '8px', background: '#f9fafb' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280', background: '#fff', padding: '4px 12px', borderRadius: '12px' }}>Date {index + 1}</span>
+                          <button
+                            type='button'
+                            onClick={() => removeArrayItem('booking_dates_items', index)}
+                            style={{ background: '#fee', color: '#dc2626', border: '1px solid #fcc', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <input
+                          type='text'
+                          value={item.heading}
+                          onChange={(e) => updateArrayItem('booking_dates_items', index, 'heading', e.target.value)}
+                          placeholder="Header (e.g. March 15–20, April 10–15)"
+                          style={{ width: '100%', padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', marginBottom: '10px', background: '#fff', color: '#1f2937' }}
+                        />
+                        <textarea
+                          value={item.description}
+                          onChange={(e) => updateArrayItem('booking_dates_items', index, 'description', e.target.value)}
+                          placeholder="Optional details (one date per line, e.g. 01 Nov - 05 Nov 2026)"
+                          rows={4}
+                          style={{ width: '100%', padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', fontFamily: 'inherit', background: '#fff', color: '#1f2937', resize: 'vertical' }}
+                        />
+                      </div>
+                    ))}
                   </div>
 
                   {/* Why Choose Us */}

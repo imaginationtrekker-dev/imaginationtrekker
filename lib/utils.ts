@@ -1,4 +1,21 @@
 /**
+ * Strips <p> tags from inside <li> elements. TipTap/ProseMirror wraps list item
+ * content in <p> tags by default, which can break list rendering on the frontend.
+ * Use this when saving/displaying rich HTML from the editor.
+ */
+export function stripPFromListItems(html: string | null | undefined): string {
+  if (!html) return "";
+  let result = html;
+  // Remove opening <p> inside <li> (with optional attributes)
+  result = result.replace(/<li([^>]*)>\s*<p([^>]*)>/gi, "<li$1>");
+  // Join multiple paragraphs in same li with <br>
+  result = result.replace(/<\/p>\s*<p([^>]*)>/gi, "<br>");
+  // Remove closing </p> before </li>
+  result = result.replace(/<\/p>\s*<\/li>/gi, "</li>");
+  return result;
+}
+
+/**
  * Strips HTML tags from a string and returns plain text (client-side)
  * @param html - HTML string to strip
  * @returns Plain text without HTML tags

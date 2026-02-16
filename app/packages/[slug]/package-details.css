@@ -531,7 +531,6 @@
 .package-safety-animated {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
   transition: max-height 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
     opacity 0.5s ease 0.1s,
     transform 0.5s ease;
@@ -546,6 +545,77 @@
 .package-safety-animated.expanded {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Safety content - rich HTML (headings, paragraphs, lists) */
+.package-safety-content {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #4b5563;
+  font-family: var(--font-jakarta);
+  padding: 0;
+  margin: 0;
+}
+
+.package-safety-content p {
+  margin: 0 0 0.75rem;
+  color: #4b5563;
+}
+
+.package-safety-content p:last-child {
+  margin-bottom: 0;
+}
+
+.package-safety-content strong {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.package-safety-content h2,
+.package-safety-content h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 1rem 0 0.5rem;
+  font-family: var(--font-fraunces), "Fraunces", serif;
+}
+
+.package-safety-content h2:first-child,
+.package-safety-content h3:first-child {
+  margin-top: 0;
+}
+
+.package-safety-content ul,
+.package-safety-content ol,
+.package-description-wrapper ol,
+.package-description-wrapper ul {
+  margin: 0.5rem 0 1rem;
+  padding-left: 1.5rem;
+}
+
+.package-safety-content ul li {
+  margin-bottom: 0.35rem;
+  color: #4b5563;
+  list-style: disc;
+}
+
+.package-safety-content ol li {
+  list-style: decimal;
+}
+
+.package-description-wrapper ul li {
+  list-style: disc;
+}
+
+/* Fix list items when TipTap wraps content in <p> inside <li> */
+.package-safety-content li p {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+.package-safety-content li::marker {
+  color: #0d5a6f;
 }
 
 /* Show More/Less Button Container */
@@ -886,13 +956,16 @@
   line-height: 1.6;
 }
 
-.package-step-description-animated {
-  transition: max-height 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    opacity 0.4s ease;
-  will-change: max-height;
+/* Itinerary 6-line clamp */
+.package-itinerary-clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Itinerary Show More Button Style */
+/* Itinerary View More Button */
 .package-show-more-btn-itinerary {
   background: linear-gradient(135deg, #1f2937 0%, #0d5a6f 100%);
   color: #ffffff;
@@ -912,6 +985,142 @@
 
 .package-show-more-btn-itinerary:active {
   transform: translateY(-1px) scale(1);
+}
+
+/* Itinerary Detail Modal */
+.itinerary-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1.5rem;
+  animation: itineraryModalFadeIn 0.25s ease;
+}
+
+@keyframes itineraryModalFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.itinerary-modal {
+  background: #fff;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 680px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: itineraryModalSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+@keyframes itineraryModalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.itinerary-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  flex-shrink: 0;
+}
+
+.itinerary-modal-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  font-family: var(--font-fraunces), "Fraunces", serif;
+  line-height: 1.3;
+}
+
+.itinerary-modal-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #e5e7eb;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.itinerary-modal-close:hover {
+  background: #d1d5db;
+  color: #111827;
+}
+
+.itinerary-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  font-size: 15px;
+  color: #4b5563;
+  line-height: 1.7;
+  font-family: var(--font-jakarta);
+}
+
+.itinerary-modal-body p,
+.itinerary-modal-body div,
+.itinerary-modal-body li {
+  color: #4b5563;
+  line-height: 1.7;
+}
+
+.itinerary-modal-body ul,
+.itinerary-modal-body ol {
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+
+.itinerary-modal-body img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+@media (max-width: 640px) {
+  .itinerary-modal {
+    max-height: 90vh;
+  }
+
+  .itinerary-modal-header {
+    padding: 1rem 1.25rem;
+  }
+
+  .itinerary-modal-title {
+    font-size: 1rem;
+  }
+
+  .itinerary-modal-body {
+    padding: 1.25rem;
+    font-size: 14px;
+  }
 }
 
 .package-step-description div {
@@ -1024,6 +1233,27 @@
   font-family: var(--font-jakarta);
   font-weight: 400;
   white-space: pre-wrap;
+}
+
+/* Moments of Trek Gallery */
+.package-moments-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.package-moment-image-wrapper {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f3f4f6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.package-moment-image-wrapper:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 /* Right Sticky Form */
@@ -1391,7 +1621,21 @@
 }
 
 /* Contact Section */
-/* Booking Dates Section - Collapsible */
+/* Booking Dates Section - Accordion per item */
+.package-booking-dates-accordions {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.package-booking-date-accordion-item {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.package-booking-date-accordion-item:last-child {
+  border-bottom: none;
+}
+
 .package-booking-dates-section {
   border-bottom: 1px solid #e5e7eb;
 }
@@ -1449,9 +1693,42 @@
 }
 
 .package-booking-dates-content.open {
-  max-height: 500px;
+  max-height: 2000px;
   padding: 0 1.5rem 1.5rem 1.5rem;
   opacity: 1;
+}
+
+/* Booking dates body - rich HTML (p, ul, li), used inside FAQ-style accordion */
+.package-booking-dates-body {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #4b5563;
+  font-family: var(--font-jakarta);
+  white-space: normal;
+}
+
+.package-booking-dates-body p {
+  margin: 0 0 0.75rem;
+  color: #4b5563;
+}
+
+.package-booking-dates-body p:last-child {
+  margin-bottom: 0;
+}
+
+.package-booking-dates-body ul,
+.package-booking-dates-body ol {
+  margin: 0.5rem 0 1rem;
+  padding-left: 1.5rem;
+}
+
+.package-booking-dates-body li {
+  margin-bottom: 0.35rem;
+  color: #4b5563;
+}
+
+.package-booking-dates-body li::marker {
+  color: #0d5a6f;
 }
 
 .package-booking-dates-list {
@@ -1969,8 +2246,7 @@
     padding: 12px;
   }
 
-  .package-details-section,
-  .package-booking-dates-header {
+  .package-details-section {
     padding: 1rem 1.25rem;
   }
 
@@ -2002,25 +2278,6 @@
 
   .recent-packages-container {
     padding-inline: 12px !important;
-  }
-
-  .package-booking-dates-header-content {
-    font-size: 0.9375rem;
-    gap: 0.625rem;
-  }
-
-  .package-booking-dates-header-content svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .package-booking-dates-chevron {
-    width: 16px;
-    height: 16px;
-  }
-
-  .package-booking-dates-content.open {
-    padding: 0 1.25rem 1.25rem 1.25rem;
   }
 
   .package-booking-date-item {

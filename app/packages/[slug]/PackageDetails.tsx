@@ -14,13 +14,16 @@ import {
   Navigation,
   HelpCircle,
   Calendar,
-  ChevronDown,
   Shield,
   Star,
   Mountain,
+  UtensilsCrossed,
+  Activity,
+  Backpack,
+  Camera,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
-import { stripHtmlTags } from "@/lib/utils";
+import { stripHtmlTags, stripPFromListItems } from "@/lib/utils";
 import "./package-details.css";
 
 interface PackageData {
@@ -45,8 +48,13 @@ interface PackageData {
   cancellation_policy: string | null;
   refund_policy: string | null;
   safety_for_trek: string | null;
+  our_food_during_trek: string | null;
+  fitness_preparation_guide: string | null;
+  things_to_carry: string | null;
+  moments_of_trek: string[] | null;
   faqs: any[] | null;
   booking_dates: string[] | null;
+  booking_dates_items: Array<{ heading: string; description: string }> | null;
   why_choose_us: any[] | string | null;
   price: number | null;
   discounted_price: number | null;
@@ -158,18 +166,15 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
   const [expandedItinerary, setExpandedItinerary] = useState<number | null>(null);
   const [activeSection, setActiveSection] = useState<string>("");
   const [navScrollPosition, setNavScrollPosition] = useState(0);
-  const [isDatesExpanded, setIsDatesExpanded] = useState(false);
+  const [expandedBookingDate, setExpandedBookingDate] = useState<number | null>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isSafetyExpanded, setIsSafetyExpanded] = useState(false);
   const [showDescriptionMore, setShowDescriptionMore] = useState(false);
   const [showSafetyMore, setShowSafetyMore] = useState(false);
   const [safetyCollapsedHeight, setSafetyCollapsedHeight] =
     useState<number>(200);
-  const [itineraryDescriptionExpanded, setItineraryDescriptionExpanded] =
-    useState<Record<number, boolean>>({});
-  const [showItineraryMore, setShowItineraryMore] = useState<
-    Record<number, boolean>
-  >({});
+  const [itineraryModalIndex, setItineraryModalIndex] = useState<number | null>(null);
+  const [itineraryOverflows, setItineraryOverflows] = useState<Record<number, boolean>>({});
   const navRef = useRef<HTMLElement | null>(null);
   const galleryRef = useRef<HTMLElement | null>(null);
   const navTrackRef = useRef<HTMLDivElement>(null);
@@ -276,6 +281,18 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
       condition: !!packageData.exclusions,
     },
     {
+      id: "our-food",
+      label: "Our Food",
+      icon: UtensilsCrossed,
+      condition: !!packageData.our_food_during_trek,
+    },
+    {
+      id: "fitness-guide",
+      label: "Fitness Guide",
+      icon: Activity,
+      condition: !!packageData.fitness_preparation_guide,
+    },
+    {
       id: "how-to-reach",
       label: "How to Reach",
       icon: Navigation,
@@ -288,10 +305,28 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
       condition: !!packageData.safety_for_trek,
     },
     {
+      id: "things-to-carry",
+      label: "Things to Carry",
+      icon: Backpack,
+      condition: !!packageData.things_to_carry,
+    },
+    {
+      id: "booking-dates",
+      label: "Booking Dates",
+      icon: Calendar,
+      condition: !!packageData.booking_dates_items && packageData.booking_dates_items.length > 0,
+    },
+    {
       id: "why-choose-us",
       label: "Why Choose Us",
       icon: Star,
       condition: whyChooseUsItems.length > 0,
+    },
+    {
+      id: "moments-of-trek",
+      label: "Moments of Trek",
+      icon: Camera,
+      condition: !!packageData.moments_of_trek && packageData.moments_of_trek.length > 0,
     },
     {
       id: "faqs",
@@ -557,14 +592,6 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
     setIsSafetyExpanded(!isSafetyExpanded);
   };
 
-  // Handle itinerary description expand/collapse
-  const toggleItineraryDescription = (index: number) => {
-    setItineraryDescriptionExpanded((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
-  };
-
   // Make sidebar sticky on desktop using JavaScript
   useEffect(() => {
     if (!sidebarRef.current || !sidebarContainerRef.current) return;
@@ -649,79 +676,36 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
     };
   }, [packageData]);
 
-  // Check itinerary description heights
+  // Check which itinerary descriptions overflow 6 lines
   useEffect(() => {
     if (!packageData.itinerary || !Array.isArray(packageData.itinerary)) return;
 
-    const checkHeights = () => {
-      const newShowMore: Record<number, boolean> = {};
-
+    const checkOverflows = () => {
+      const overflows: Record<number, boolean> = {};
       itineraryDescriptionRefs.current.forEach((ref, index) => {
         if (!ref) return;
-
-        // Remove constraints to measure full height
+        ref.style.webkitLineClamp = "none";
         ref.style.maxHeight = "none";
         ref.style.overflow = "visible";
-        void ref.offsetHeight; // Force reflow
-
+        void ref.offsetHeight;
         const fullHeight = ref.scrollHeight;
-        const ITINERARY_COLLAPSED_HEIGHT = 2000;
-
-        if (fullHeight > ITINERARY_COLLAPSED_HEIGHT) {
-          newShowMore[index] = true;
-
-          // Apply collapsed state if not expanded
-          if (!itineraryDescriptionExpanded[index]) {
-            ref.style.maxHeight = `${ITINERARY_COLLAPSED_HEIGHT}px`;
-            ref.style.overflow = "hidden";
-          }
-        } else {
-          newShowMore[index] = false;
-          ref.style.maxHeight = "none";
-          ref.style.overflow = "visible";
-        }
+        const lineHeight = parseFloat(getComputedStyle(ref).lineHeight) || 25.6;
+        const sixLineHeight = lineHeight * 6 + 8;
+        overflows[index] = fullHeight > sixLineHeight;
+        ref.style.webkitLineClamp = "";
+        ref.style.maxHeight = "";
+        ref.style.overflow = "";
       });
-
-      setShowItineraryMore(newShowMore);
+      setItineraryOverflows(overflows);
     };
 
-    const t = setTimeout(checkHeights, 500);
-    window.addEventListener("resize", checkHeights);
+    const t = setTimeout(checkOverflows, 500);
+    window.addEventListener("resize", checkOverflows);
     return () => {
       clearTimeout(t);
-      window.removeEventListener("resize", checkHeights);
+      window.removeEventListener("resize", checkOverflows);
     };
-  }, [packageData.itinerary, itineraryDescriptionExpanded]);
-
-  // Apply itinerary description expanded/collapsed state
-  useEffect(() => {
-    itineraryDescriptionRefs.current.forEach((ref, index) => {
-      if (!ref) return;
-
-      const ITINERARY_COLLAPSED_HEIGHT = 2000;
-
-      if (itineraryDescriptionExpanded[index]) {
-        // Expanded: measure full height and animate to it
-        ref.style.maxHeight = "none";
-        ref.style.overflow = "visible";
-        void ref.offsetHeight; // Force reflow
-        const fullHeight = ref.scrollHeight;
-        ref.style.maxHeight = `${fullHeight}px`;
-
-        setTimeout(() => {
-          if (ref && itineraryDescriptionExpanded[index]) {
-            ref.style.maxHeight = "none";
-          }
-        }, 700);
-      } else {
-        // Collapsed: set to 2000px
-        if (showItineraryMore[index]) {
-          ref.style.maxHeight = `${ITINERARY_COLLAPSED_HEIGHT}px`;
-          ref.style.overflow = "hidden";
-        }
-      }
-    });
-  }, [itineraryDescriptionExpanded, showItineraryMore]);
+  }, [packageData.itinerary, expandedItinerary]);
 
   return (
     <>
@@ -1125,67 +1109,31 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
                                   <>
                                     <div
                                       ref={(el) => {
-                                        itineraryDescriptionRefs.current[
-                                          index
-                                        ] = el;
+                                        itineraryDescriptionRefs.current[index] = el;
                                       }}
-                                      className="package-step-description package-step-description-animated"
-                                      style={{
-                                        maxHeight:
-                                          showItineraryMore[index] &&
-                                          !itineraryDescriptionExpanded[index]
-                                            ? "2000px"
-                                            : "none",
-                                        overflow:
-                                          showItineraryMore[index] &&
-                                          !itineraryDescriptionExpanded[index]
-                                            ? "hidden"
-                                            : "visible",
-                                      }}
+                                      className="package-step-description package-itinerary-clamped"
                                       dangerouslySetInnerHTML={{
-                                        __html: item.description.replace(
-                                          /\n/g,
-                                          "<br />",
-                                        ),
+                                        __html: item.description.replace(/\n/g, "<br />"),
                                       }}
                                     />
-                                    {expandedItinerary === index &&
-                                      showItineraryMore[index] && (
-                                        <div className="package-show-more-container">
-                                          <button
-                                            className="package-show-more-btn package-show-more-btn-itinerary"
-                                            onClick={() =>
-                                              toggleItineraryDescription(index)
-                                            }
-                                            aria-label={
-                                              itineraryDescriptionExpanded[
-                                                index
-                                              ]
-                                                ? "Show less"
-                                                : "Show more"
-                                            }
-                                          >
-                                            <span>
-                                              {itineraryDescriptionExpanded[
-                                                index
-                                              ]
-                                                ? "Show Less"
-                                                : "Show More"}
-                                            </span>
-                                            <svg
-                                              className={`package-show-more-icon ${itineraryDescriptionExpanded[index] ? "expanded" : ""}`}
-                                              width="16"
-                                              height="16"
-                                              viewBox="0 0 24 24"
-                                              fill="none"
-                                              stroke="currentColor"
-                                              strokeWidth="2"
-                                            >
-                                              <polyline points="6 9 12 15 18 9" />
-                                            </svg>
-                                          </button>
-                                        </div>
-                                      )}
+                                    {expandedItinerary === index && itineraryOverflows[index] && (
+                                      <div style={{ marginTop: "12px" }}>
+                                        <button
+                                          className="package-show-more-btn package-show-more-btn-itinerary"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setItineraryModalIndex(index);
+                                          }}
+                                          aria-label="View more"
+                                        >
+                                          <span>View More</span>
+                                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <polyline points="7 17 17 7" />
+                                            <polyline points="7 7 17 7 17 17" />
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    )}
                                   </>
                                 )}
                               </div>
@@ -1284,6 +1232,42 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
                 </div>
               )}
 
+              {/* Our Food During Trek - after Exclusions */}
+              {packageData.our_food_during_trek && (
+                <div id="our-food" className="package-section">
+                  <h2 className="package-section-title">
+                    <UtensilsCrossed size={24} className="package-section-title-icon" />
+                    Our Food During Trek
+                  </h2>
+                  <div
+                    className="package-safety-content"
+                    dangerouslySetInnerHTML={{
+                      __html: stripPFromListItems(
+                        packageData.our_food_during_trek.replace(/\n/g, "<br />"),
+                      ),
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Fitness Preparation Guide */}
+              {packageData.fitness_preparation_guide && (
+                <div id="fitness-guide" className="package-section">
+                  <h2 className="package-section-title">
+                    <Activity size={24} className="package-section-title-icon" />
+                    Fitness Preparation Guide
+                  </h2>
+                  <div
+                    className="package-safety-content"
+                    dangerouslySetInnerHTML={{
+                      __html: stripPFromListItems(
+                        packageData.fitness_preparation_guide.replace(/\n/g, "<br />"),
+                      ),
+                    }}
+                  />
+                </div>
+              )}
+
               {/* How to Reach */}
               {packageData.how_to_reach && (
                 <div id="how-to-reach" className="package-section">
@@ -1339,23 +1323,17 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
                   <div className="package-safety-wrapper">
                     <div
                       ref={safetyRef}
-                      className="package-exclusions package-safety-animated collapsed"
+                      className="package-safety-content package-safety-animated collapsed"
                       style={{
                         maxHeight: "200px",
                         overflow: "hidden",
                       }}
-                    >
-                      {parseContentToList(packageData.safety_for_trek).map(
-                        (item, index) => (
-                          <div key={index} className="package-list-item">
-                            <div
-                              className="package-list-text"
-                              dangerouslySetInnerHTML={{ __html: item }}
-                            />
-                          </div>
+                      dangerouslySetInnerHTML={{
+                        __html: stripPFromListItems(
+                          packageData.safety_for_trek.replace(/\n/g, "<br />"),
                         ),
-                      )}
-                    </div>
+                      }}
+                    />
                     {showSafetyMore && (
                       <div className="package-show-more-container">
                         <button
@@ -1385,6 +1363,76 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
                   </div>
                 </div>
               )}
+
+              {/* Things to Carry - after Safety */}
+              {packageData.things_to_carry && (
+                <div id="things-to-carry" className="package-section">
+                  <h2 className="package-section-title">
+                    <Backpack size={24} className="package-section-title-icon" />
+                    Things to Carry
+                  </h2>
+                  <div
+                    className="package-safety-content"
+                    dangerouslySetInnerHTML={{
+                      __html: stripPFromListItems(
+                        packageData.things_to_carry.replace(/\n/g, "<br />"),
+                      ),
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Booking Dates - Accordion per item (same design as FAQs) */}
+              {packageData.booking_dates_items &&
+                packageData.booking_dates_items.length > 0 && (
+                  <div id="booking-dates" className="package-section">
+                    <h2 className="package-section-title">
+                      <Calendar size={24} className="package-section-title-icon" />
+                      Booking Dates
+                    </h2>
+                    <div className="package-faqs">
+                      {packageData.booking_dates_items.map((item, index) => (
+                        <div key={index} className="package-faq-item">
+                          <button
+                            className="package-faq-question"
+                            onClick={() =>
+                              setExpandedBookingDate(
+                                expandedBookingDate === index ? null : index,
+                              )
+                            }
+                          >
+                            <span>{item.heading || `Date ${index + 1}`}</span>
+                            <div className="package-faq-icon-wrapper">
+                              <svg
+                                className={`package-faq-icon ${expandedBookingDate === index ? "rotated" : ""}`}
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <polyline points="6 9 12 15 18 9" />
+                              </svg>
+                            </div>
+                          </button>
+                          <div
+                            className={`package-faq-answer ${expandedBookingDate === index ? "open" : ""}`}
+                          >
+                            {item.description && (
+                              <div
+                                className="package-faq-answer-content package-booking-dates-body"
+                                dangerouslySetInnerHTML={{
+                                  __html: item.description.replace(/\n/g, "<br />"),
+                                }}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
               {/* Why Choose Us */}
               {whyChooseUsItems.length > 0 && (
@@ -1428,6 +1476,33 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
                   </div>
                 </div>
               )}
+
+              {/* Moments of Trek - after Why Choose Us */}
+              {packageData.moments_of_trek &&
+                packageData.moments_of_trek.length > 0 && (
+                  <div id="moments-of-trek" className="package-section">
+                    <h2 className="package-section-title">
+                      <Camera size={24} className="package-section-title-icon" />
+                      Moments of Trek
+                    </h2>
+                    <div className="package-moments-gallery">
+                      {packageData.moments_of_trek.map((url, index) => (
+                        <div
+                          key={index}
+                          className="package-moment-image-wrapper"
+                        >
+                          <Image
+                            src={url}
+                            alt={`Moment ${index + 1}`}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                            style={{ objectFit: "cover" }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
               {/* FAQs */}
               {packageData.faqs &&
@@ -1762,54 +1837,6 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
                   </div>
                 </div>
 
-                {/* Booking Dates - Collapsible */}
-                {/* {packageData.booking_dates &&
-                  packageData.booking_dates.length > 0 && (
-                    <div className="package-booking-dates-section">
-                      <button
-                        type="button"
-                        className="package-booking-dates-header"
-                        onClick={() => setIsDatesExpanded(!isDatesExpanded)}
-                      >
-                        <div className="package-booking-dates-header-content">
-                          <Calendar size={18} />
-                          <span>Available Dates</span>
-                        </div>
-                        <ChevronDown
-                          size={18}
-                          className={`package-booking-dates-chevron ${isDatesExpanded ? "expanded" : ""}`}
-                        />
-                      </button>
-                      <div
-                        className={`package-booking-dates-content ${isDatesExpanded ? "open" : ""}`}
-                      >
-                        <div className="package-booking-dates-list">
-                          {packageData.booking_dates.map((date, index) => {
-                            const dateObj = new Date(date);
-                            const formattedDate = dateObj.toLocaleDateString(
-                              "en-US",
-                              {
-                                weekday: "short",
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              },
-                            );
-                            return (
-                              <div
-                                key={index}
-                                className="package-booking-date-item"
-                              >
-                                <Calendar size={16} />
-                                <span>{formattedDate}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  )} */}
-
                 {/* Contact Information */}
                 <div className="package-contact-section">
                   <h4 className="package-contact-title">
@@ -1956,6 +1983,44 @@ export default function PackageDetails({ packageData }: PackageDetailsProps) {
           packageName={packageData.package_name}
         />
       )}
+
+      {/* Itinerary Detail Modal */}
+      {itineraryModalIndex !== null &&
+        packageData.itinerary &&
+        Array.isArray(packageData.itinerary) &&
+        packageData.itinerary[itineraryModalIndex] && (
+          <div
+            className="itinerary-modal-overlay"
+            onClick={() => setItineraryModalIndex(null)}
+          >
+            <div
+              className="itinerary-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="itinerary-modal-header">
+                <h3 className="itinerary-modal-title">
+                  {packageData.itinerary[itineraryModalIndex].heading}
+                </h3>
+                <button
+                  className="itinerary-modal-close"
+                  onClick={() => setItineraryModalIndex(null)}
+                  aria-label="Close"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+              <div
+                className="itinerary-modal-body"
+                dangerouslySetInnerHTML={{
+                  __html: packageData.itinerary[itineraryModalIndex].description.replace(/\n/g, "<br />"),
+                }}
+              />
+            </div>
+          </div>
+        )}
 
       {/* Recent Packages Slider */}
       <RecentPackagesSlider currentPackageId={packageData.id} />

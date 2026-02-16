@@ -6,6 +6,7 @@ import Underline from '@tiptap/extension-underline';
 import Image from '@tiptap/extension-image';
 import { useEffect, useRef, useState } from 'react';
 import { Image as ImageIcon } from 'lucide-react';
+import { stripPFromListItems } from '@/lib/utils';
 
 interface RichTextEditorProps {
   value: string;
@@ -41,10 +42,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Start typing...
       if (isUpdatingRef.current) return;
       
       let html = editor.getHTML();
-      
-      // Remove <p> tags from inside <li> tags
-      html = html.replace(/<li[^>]*>\s*<p[^>]*>/gi, '<li>');
-      html = html.replace(/<\/p>\s*<\/li>/gi, '</li>');
+      html = stripPFromListItems(html);
       
       // If autoBulletList is enabled and content is not a list, ensure it becomes one
       if (autoBulletList && !html.includes('<ul>') && !html.includes('<ol>')) {
@@ -52,10 +50,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Start typing...
         if (text) {
           // Convert to bullet list
           editor.chain().focus().selectAll().toggleBulletList().run();
-          html = editor.getHTML();
-          // Clean up again after conversion
-          html = html.replace(/<li[^>]*>\s*<p[^>]*>/gi, '<li>');
-          html = html.replace(/<\/p>\s*<\/li>/gi, '</li>');
+          html = stripPFromListItems(editor.getHTML());
         }
       }
       
@@ -90,9 +85,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Start typing...
     isUpdatingRef.current = true;
     
     try {
-      // Clean up value: remove <p> tags from inside <li> tags
-      let cleanedValue = normalizedValue.replace(/<li[^>]*>\s*<p[^>]*>/gi, '<li>');
-      cleanedValue = cleanedValue.replace(/<\/p>\s*<\/li>/gi, '</li>');
+      let cleanedValue = stripPFromListItems(normalizedValue);
       
       // Ensure images are properly formatted for TipTap
       // TipTap Image extension expects <img> tags with src attribute
