@@ -84,7 +84,14 @@
   padding-left: 2rem;
 }
 
-.policy-main-content li {
+.policy-main-content ul li {
+  list-style: disc;
+  margin-bottom: 0.75rem;
+  color: #374151;
+}
+
+.policy-main-content ol li {
+  list-style: decimal;
   margin-bottom: 0.75rem;
   color: #374151;
 }
