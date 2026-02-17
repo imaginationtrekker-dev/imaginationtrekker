@@ -188,24 +188,53 @@ export default function PackagesPage() {
       setUploadingDocument(true);
       setError(null);
       setPdfDeliveryBlocked(false);
-      const uploadFormData = new FormData();
-      uploadFormData.append('file', file);
 
-      const uploadResponse = await fetch('/api/upload-cloudinary-pdf', {
+      // 1. Get upload signature from API (no file - avoids Vercel 5MB limit)
+      const sigResponse = await fetch('/api/upload-cloudinary-pdf-signature');
+      if (!sigResponse.ok) {
+        const errData = await sigResponse.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to get upload signature');
+      }
+      const { cloudName, apiKey, signature, timestamp, publicId, folder } = await sigResponse.json();
+
+      // 2. Upload file directly from client to Cloudinary (bypasses server)
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`;
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file, file.name || 'document.pdf');
+      uploadFormData.append('public_id', publicId);
+      uploadFormData.append('folder', folder);
+      uploadFormData.append('api_key', apiKey);
+      uploadFormData.append('timestamp', timestamp);
+      uploadFormData.append('signature', signature);
+
+      const uploadResponse = await fetch(cloudinaryUrl, {
         method: 'POST',
         body: uploadFormData,
       });
 
       if (!uploadResponse.ok) {
         const errData = await uploadResponse.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to upload PDF');
+        const msg = errData.error?.message || errData.error || 'Failed to upload PDF to Cloudinary';
+        throw new Error(msg);
       }
 
-      const { url, publicId, deliveryBlocked } = await uploadResponse.json();
+      const data = await uploadResponse.json();
+      const pdfUrl = data.secure_url || data.url;
+      const returnedPublicId = data.public_id;
+
+      // 3. Verify PDF is publicly accessible (client-side check)
+      let deliveryBlocked = false;
+      try {
+        const headCheck = await fetch(pdfUrl, { method: 'HEAD' });
+        if (!headCheck.ok) deliveryBlocked = true;
+      } catch {
+        deliveryBlocked = true;
+      }
+
       setFormData(prev => ({
         ...prev,
-        document_url: url,
-        document_cloudinary_public_id: publicId,
+        document_url: pdfUrl,
+        document_cloudinary_public_id: returnedPublicId,
       }));
       if (deliveryBlocked) {
         setPdfDeliveryBlocked(true);
