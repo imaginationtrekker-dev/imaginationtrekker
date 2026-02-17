@@ -16,9 +16,26 @@ export default function Testimonials() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [cardsToShow, setCardsToShow] = useState(2);
   const trackRef = useRef<HTMLDivElement>(null);
-  const cardsToShow = 3;
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const maxIndex = Math.max(0, testimonials.length - cardsToShow);
+
+  // Handle responsive cards to show (2 per row on desktop/tablet, 1 on mobile)
+  useEffect(() => {
+    const updateCardsToShow = () => {
+      if (window.innerWidth <= 768) {
+        setCardsToShow(1);
+      } else {
+        setCardsToShow(2);
+      }
+    };
+
+    updateCardsToShow();
+    window.addEventListener("resize", updateCardsToShow);
+    return () => window.removeEventListener("resize", updateCardsToShow);
+  }, []);
 
   // Fetch testimonials from API
   useEffect(() => {
@@ -73,6 +90,106 @@ export default function Testimonials() {
       ease: "power2.out",
     });
   }, [currentIndex, testimonials.length]);
+
+  // Drag/touch functionality for mobile scrolling
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider || testimonials.length === 0) return;
+
+    let dragStartX = 0;
+    let dragStartIndex = 0;
+    let isDraggingState = false;
+    let hasMovedSignificantly = false;
+
+    const handleStart = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("a") || target.closest("button")) return;
+
+      isDraggingState = true;
+      hasMovedSignificantly = false;
+      setIsDragging(true);
+      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+      dragStartX = clientX;
+      dragStartIndex = currentIndex;
+    };
+
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      if (!isDraggingState) return;
+
+      const target = e.target as HTMLElement;
+      if (target.closest("a") || target.closest("button")) {
+        isDraggingState = false;
+        setIsDragging(false);
+        hasMovedSignificantly = false;
+        return;
+      }
+
+      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+      const diff = dragStartX - clientX;
+      const moveThreshold = 10;
+      const slideThreshold = 50;
+
+      if (Math.abs(diff) > moveThreshold) {
+        hasMovedSignificantly = true;
+        e.preventDefault();
+      }
+
+      if (Math.abs(diff) > slideThreshold) {
+        if (diff > 0 && dragStartIndex < maxIndex) {
+          setCurrentIndex(dragStartIndex + 1);
+          isDraggingState = false;
+          setIsDragging(false);
+          hasMovedSignificantly = false;
+        } else if (diff < 0 && dragStartIndex > 0) {
+          setCurrentIndex(dragStartIndex - 1);
+          isDraggingState = false;
+          setIsDragging(false);
+          hasMovedSignificantly = false;
+        }
+      }
+    };
+
+    const handleEnd = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("a") || target.closest("button")) {
+        isDraggingState = false;
+        setIsDragging(false);
+        hasMovedSignificantly = false;
+        return;
+      }
+
+      if (isDraggingState && !hasMovedSignificantly) {
+        isDraggingState = false;
+        setIsDragging(false);
+        return;
+      }
+
+      if (hasMovedSignificantly) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      isDraggingState = false;
+      setIsDragging(false);
+      hasMovedSignificantly = false;
+    };
+
+    slider.addEventListener("mousedown", handleStart);
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleEnd);
+    slider.addEventListener("touchstart", handleStart, { passive: false });
+    slider.addEventListener("touchmove", handleMove, { passive: false });
+    slider.addEventListener("touchend", handleEnd);
+
+    return () => {
+      slider.removeEventListener("mousedown", handleStart);
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleEnd);
+      slider.removeEventListener("touchstart", handleStart);
+      slider.removeEventListener("touchmove", handleMove);
+      slider.removeEventListener("touchend", handleEnd);
+    };
+  }, [currentIndex, maxIndex, testimonials.length]);
 
   const goToNext = () => {
     setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
@@ -138,7 +255,11 @@ export default function Testimonials() {
             </svg>
           </button>
 
-          <div className="testimonials-slider">
+          <div
+            className="testimonials-slider"
+            ref={sliderRef}
+            style={{ cursor: isDragging ? "grabbing" : "grab" }}
+          >
             <div className="testimonials-track" ref={trackRef}>
               {testimonials.map((testimonial, index) => (
                 <div key={index} className="testimonial-card">
