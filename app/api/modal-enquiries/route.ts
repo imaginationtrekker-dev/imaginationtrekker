@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,7 +30,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createServerSupabaseClient();
+    // Use admin client for insert - bypasses RLS so anonymous users can submit the form
+    const supabase = supabaseAdmin;
 
     // Insert enquiry into database
     const { data, error } = await supabase
