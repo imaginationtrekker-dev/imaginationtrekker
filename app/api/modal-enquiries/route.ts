@@ -3,8 +3,23 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { fullName, whatsapp, message } = body;
+    // Support both JSON and form-urlencoded (form-urlencoded works better in Instagram/in-app browsers)
+    const contentType = request.headers.get("content-type") || "";
+    let fullName: string;
+    let whatsapp: string;
+    let message: string;
+
+    if (contentType.includes("application/x-www-form-urlencoded")) {
+      const formData = await request.formData();
+      fullName = (formData.get("fullName") as string) || "";
+      whatsapp = (formData.get("whatsapp") as string) || "";
+      message = (formData.get("message") as string) || "";
+    } else {
+      const body = await request.json();
+      fullName = body.fullName ?? "";
+      whatsapp = body.whatsapp ?? "";
+      message = body.message ?? "";
+    }
 
     // Validation
     if (!fullName || !whatsapp || !message) {

@@ -23,24 +23,38 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
 
+  const submitEnquiry = async (): Promise<{ message?: string }> => {
+    const body = new URLSearchParams({
+      fullName: formData.fullName,
+      whatsapp: formData.whatsapp,
+      message: formData.message,
+    }).toString();
+
+    const response = await fetch("/api/modal-enquiries", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Cache-Control": "no-cache, no-store",
+      },
+      body,
+      cache: "no-store",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to submit enquiry");
+    }
+
+    return result;
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/modal-enquiries", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to submit enquiry");
-      }
+      const result = await submitEnquiry();
 
       // Show success toast
       setToast({
@@ -57,12 +71,22 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
         onClose();
         setToast(null);
       }, 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      // Retry once on network failure (common in Instagram/in-app browsers with spotty connections)
+      const err = error instanceof Error ? error : new Error("Network error");
+      try {
+        const result = await submitEnquiry();
+        setToast({ id: Date.now().toString(), message: result.message || "Thank you! We'll get back to you within 24 hours.", type: "success" });
+        setFormData({ fullName: "", whatsapp: "", message: "" });
+        setTimeout(() => { onClose(); setToast(null); }, 2000);
+        return;
+      } catch {
+        // Retry failed too - show error
+      }
       console.error("Error submitting form:", error);
-      // Show error toast
       setToast({
         id: Date.now().toString(),
-        message: error.message || "Failed to submit enquiry. Please try again.",
+        message: err.message || "Failed to submit. Try again or open this page in your phone's browser (Chrome/Safari).",
         type: "error",
       });
     } finally {
